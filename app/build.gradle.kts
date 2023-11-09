@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace = "com.example.chatgpt_english"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.chatgpt_english"
-        minSdk = 24
-        targetSdk = 33
+        minSdk = 30
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
