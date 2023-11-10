@@ -6,32 +6,4 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/responseView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Response will appear"
-        app:layout_constraintBottom_toTopOf="@+id/userInput"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-
-    <EditText
-        android:id="@+id/userInput"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter your input"
-        app:layout_constraintBottom_toTopOf="@+id/sendButton"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp" />
-
-    <Button
-        android:id="@+id/sendButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Send"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginBottom="200dp"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
