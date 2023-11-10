@@ -1,119 +1,127 @@
 package com.example.chatgpt_english;
 
-import static android.os.Environment.DIRECTORY_DOWNLOADS;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-import android.content.ContentUris;
-import android.content.pm.PackageManager;
+import android.content.Intent;
+import android.os.Handler;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.Socket;
+public class MainActivity extends AppCompatActivity{
+    Button connect_btn;                 // ip 받아오는 버튼
 
-import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.provider.MediaStore;
-import android.widget.Toast;
+    EditText ip_edit;               // ip 에디트
+    TextView show_text;             // 서버에서온거 보여주는 에디트
+    // 소켓통신에 필요한것
+    private String html = "";
+    private Handler mHandler;
 
-import com.example.chatgpt_english.data.drivingData;
+    private Socket socket;
 
-import java.io.InputStream;
+    private BufferedReader networkReader;
+    private PrintWriter networkWriter;
 
-public class MainActivity extends AppCompatActivity {
-    TextView speed;
-    Button btn;
+    private DataOutputStream dos;
+    private DataInputStream dis;
+
+    private String ip = "192.168.56.1";            // IP 번호
+    private int port = 12345;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        speed = findViewById(R.id.speed);
-        btn = findViewById(R.id.testButton);
-        speed.setText(drivingData.speed+"");
 
-        btn.setOnClickListener(new View.OnClickListener(){
+        connect_btn = (Button)findViewById(R.id.connect_btn);
+        connect_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                checkExternalStorage();
-                File file = new File(Environment.getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS)+"/somefile.txt"+"/somefile.txt");
-                Log.d("somefile", file.getAbsolutePath());
+                connect();
 
-                Toast.makeText(getApplicationContext(),"sdcard/Download"+"/somefile.txt",Toast.LENGTH_SHORT).show();
-                try {
-                    Log.d("somefile", file.getAbsolutePath());
-
-                    BufferedReader reader = new BufferedReader(new FileReader(file));
-                    Log.d("somefile", "외부메모리 읽기 쓰기 모두 가능");
-
-                    StringBuffer buffer = new StringBuffer();
-                    String line;
-                    while ((line=reader.readLine())!=null){
-                         buffer.append(line);
-                    }
-                    reader.close();
-
-                }catch (Exception e){
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(),"오류", Toast.LENGTH_SHORT).show();
-                }
             }
         });
+
+        ip_edit = (EditText)findViewById(R.id.ip_edit);
+        show_text = (TextView)findViewById(R.id.show_text);
     }
-    boolean checkExternalStorage() {
-        String state = Environment.getExternalStorageState();
-        // 외부메모리 상태
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            // 읽기 쓰기 모두 가능
-            Log.d("STATE", "외부메모리 읽기 쓰기 모두 가능");
-            Toast.makeText(getApplicationContext(),"외부메모리 읽기 쓰기 모두 가능", Toast.LENGTH_SHORT).show();
-            return true;
-        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)){
-            //읽기전용
-            Log.d("STATE", "외부메모리 읽기만 가능");
-            Toast.makeText(getApplicationContext(),"외부메모리 읽기만 가능",Toast.LENGTH_SHORT).show();
-            return false;
-        } else {
-            // 읽기쓰기 모두 안됨
-            Log.d("STATE", "외부메모리 읽기쓰기 모두 안됨 : "+ state);
-            Toast.makeText(getApplicationContext(),"외부메모리 읽기쓰기 모두 안됨 : "+ state,Toast.LENGTH_SHORT).show();
-            return false;
-        }
+
+    void connect(){
+        mHandler = new Handler();
+        Log.w("connect","연결 하는중");
+        // 받아오는거
+        Thread checkUpdate = new Thread() {
+            public void run() {
+                // ip받기
+                String newip = String.valueOf(ip_edit.getText());
+
+                // 서버 접속
+                try {
+                    socket = new Socket(newip, port);
+                    Log.w("서버", "서버 접속됨");
+                } catch (IOException e1) {
+                    Log.w("서버", "서버접속못함");
+                    e1.printStackTrace();
+                }
+
+                Log.w("edit 넘어가야 할 값 : ","안드로이드에서 서버로 연결요청");
+
+                // Buffered가 잘못된듯.
+                try {
+                    dos = new DataOutputStream(socket.getOutputStream());   // output에 보낼꺼 넣음
+                    dis = new DataInputStream(socket.getInputStream());     // input에 받을꺼 넣어짐
+                    dos.writeUTF("안드로이드에서 서버로 연결요청");
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.w("서버", "버퍼생성 잘못됨");
+                }
+                Log.w("서버","버퍼생성 잘됨");
+
+                while(true) {
+                    // 서버에서 받아옴
+                    try {
+                        String line = "";
+                        int line2;
+                        while (true) {
+                            //line = (String) dis.readUTF();
+                            line2 = (int) dis.read();
+                            //Log.w("서버에서 받아온 값 ", "" + line);
+                            //Log.w("서버에서 받아온 값 ", "" + line2);
+
+                            if(line2 > 0) {
+                                Log.w("서버", "" + line2);
+                                dos.writeUTF("하나 받았습니다. : " + line2);
+                                dos.flush();
+                            }
+                            if(line2 == 99) {
+                                Log.w("서버", "" + line2);
+                                socket.close();
+                                break;
+                            }
+                        }
+                    } catch (Exception e) {
+
+                    }
+                }
+
+            }
+        };
+        checkUpdate.start();
     }
-//    public void readFile() {
-//
-//        String fileTitle = "somefile.txt";
-//        File file = new File(Environment.DIRECTORY_DOWNLOADS(), fileTitle);
-//
-//        try {
-//            BufferedReader reader = new BufferedReader(new FileReader(file));
-//            String result = "";
-//            String line;
-//            while ((line = reader.readLine()) != null) {
-//                result += line;
-//            }
-//
-//            System.out.println( "불러온 내용 : " + result);
-//
-//            reader.close();
-//        } catch (FileNotFoundException e1) {
-//
-//        } catch (IOException e2) {
-//
-//        }
-//
-//    }
 
 }
