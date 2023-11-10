@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">ChatGPT_English</string>
+    <string name="title_activity_profile_settings">ProfileSettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">프로필 설정</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">이름</string>
+    <string name="sex_title">성별</string>
+    <string name="driving_exp_title">운전 실력</string>
+    <string name="english_skill_title">영어 실력</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="title_activity_generate">GenerateActivity</string>
 </resources>
