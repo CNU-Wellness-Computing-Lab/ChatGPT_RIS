@@ -41,7 +41,7 @@ public class GenerateActivity extends AppCompatActivity {
 
     private String drivingSkill;
     private String englishSkill;
-    private String category;
+    private String topic;
 
     private JSONObject jsonResponse;
     private String[] parsedContent;
@@ -63,16 +63,17 @@ public class GenerateActivity extends AppCompatActivity {
 
         drivingSkill = sharedPreferences.getString("driving_exp", "1");
         englishSkill = sharedPreferences.getString("english_skill", "1");
+        topic = sharedPreferences.getString("topic", "랜덤 주제");
 
         //TODO: 사용자 프로필 중 주제에 따른 영어 학습 컨텐츠 제공
-        Log.d("TAG", "driving skill= " + drivingSkill + "| english skill= " + englishSkill);
+        Log.d("TAG", "driving skill= " + drivingSkill + "| english skill= " + englishSkill + "| topic= " + topic);
 
         // GPT api response test
         String input = "당신의 역할은 '영어 학습 컨텐츠 제공자'입니다. " +
                 "운전 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 숙련자와 같다고 하고, " +
                 "영어 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 영어 언어학자 수준하고 같다고 해."+
-                "이때 사용자의 운전 실력은" + drivingSkill + " 영어 실력은" + englishSkill + " 주제는 여행 으로 설정할 때+" +
-                "사용자의 영어 실력과 주제를 고려하여 영어 학습을 하기 위한 영어 문장 15개를 생성해줘."+
+                "이때 사용자의 운전 실력은" + drivingSkill + " 영어 실력은" + englishSkill + " 주제는 "+ topic + "으로 설정할 때+" +
+                "사용자의 운전 실력과 영어 실력에 따라 영어 학습 문장 난이도를 조절하고, 주제메 맞는 영어 학습을 하기 위한 영어 문장 15개를 생성해줘."+
                 "단, 영어 단어의 개수가 서로 다른 15개의 문장을 생성해줘  (단어 개수 최소 3개, 최대 15개)" +
                 "출력 예시는 아래의 예시와 같이 학습을 위한 오직 영어 문장만 출력하고, 이 외 다른 응답은 출력하지마." +
                 "Again, you MUST only say the 15 english sentences for learning and do not contain numbering" +

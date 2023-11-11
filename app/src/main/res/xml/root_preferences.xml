@@ -31,6 +31,11 @@
             app:title="@string/english_skill_title"
             app:useSimpleSummaryProvider="true"
             />
+        <EditTextPreference
+            app:key="topic"
+            app:title="@string/user_topic"
+            app:useSimpleSummaryProvider="true"
+            />
     </PreferenceCategory>
 
 </PreferenceScreen>
