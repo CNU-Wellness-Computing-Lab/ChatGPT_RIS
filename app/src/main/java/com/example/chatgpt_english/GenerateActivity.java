@@ -17,6 +17,10 @@ import android.widget.TextView;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.*;
 import okhttp3.Call;
@@ -35,33 +39,54 @@ public class GenerateActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private Button nextBtn;
 
+    private String drivingSkill;
+    private String englishSkill;
+    private String category;
+
     private JSONObject jsonResponse;
+    private String[] parsedContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_generate);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         responseView = findViewById(R.id.responseView);
-        client = new OkHttpClient();
+
+        client = new OkHttpClient.Builder()
+                .readTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .build();
 
         nextBtn = findViewById(R.id.nextBtn);
         nextBtn.setEnabled(false);
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        //TODO: 사용자 프로필 기반 영어 학습 컨텐츠 제공
-        Log.d("TAG", sharedPreferences.getString("sex", "default"));
+        drivingSkill = sharedPreferences.getString("driving_exp", "1");
+        englishSkill = sharedPreferences.getString("english_skill", "1");
+
+        //TODO: 사용자 프로필 중 주제에 따른 영어 학습 컨텐츠 제공
+        Log.d("TAG", "driving skill= " + drivingSkill + "| english skill= " + englishSkill);
 
         // GPT api response test
-        postRequest("What is your GPT version?");
+        String input = "당신의 역할은 '영어 학습 컨텐츠 제공자'입니다. " +
+                "운전 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 숙련자와 같다고 하고, " +
+                "영어 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 영어 언어학자 수준하고 같다고 해."+
+                "이때 사용자의 운전 실력은" + drivingSkill + " 영어 실력은" + englishSkill + " 주제는 여행 으로 설정할 때+" +
+                "사용자의 영어 실력과 주제를 고려하여 영어 학습을 하기 위한 영어 문장 15개를 생성해줘."+
+                "단, 영어 단어의 개수가 서로 다른 15개의 문장을 생성해줘  (단어 개수 최소 3개, 최대 15개)" +
+                "출력 예시는 아래의 예시와 같이 학습을 위한 오직 영어 문장만 출력하고, 이 외 다른 응답은 출력하지마." +
+                "Again, you MUST only say the 15 english sentences for learning and do not contain numbering" +
+                "출력 예시 다음과 같아. I am a boy"
+                ;
+        postRequest(input);
 
         nextBtn.setOnClickListener((v) -> {
             Intent intent = new Intent(this, LearningActivity.class);
-            String gptResponse = jsonResponse.toString();
-            intent.putExtra("gpt_json_data", gptResponse);
+            intent.putExtra("parsed_content", parsedContent);
+
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
-
     }
 
     @Override
@@ -81,6 +106,28 @@ public class GenerateActivity extends AppCompatActivity {
                 .show();
     }
 
+    public String[] parseResponse(String response){
+        String[] parsedResponse = response.split("\n");
+        ArrayList<String> finalResponse = new ArrayList<>();
+        //check parsing error
+        for(int i = 0; i < parsedResponse.length; i++){
+            if(!parsedResponse[i].equals("")){
+                finalResponse.add(parsedResponse[i]);
+            }
+        }
+
+        Collections.sort(finalResponse, new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                int comp1 = s1.split("\\s+").length;
+                int comp2 = s2.split("\\s+").length;
+                return Integer.compare(comp1, comp2);
+            }
+        });
+
+        return finalResponse.toArray(new String[0]);
+    }
+
 
     /**
      * GPT-4 API 연동을 위한 코드
@@ -92,7 +139,12 @@ public class GenerateActivity extends AppCompatActivity {
         MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
         String apiKey = "ADD API KEY HERE";
         String model = "gpt-4-1106-preview";
-        String postBody = "{\"model\": \"" + model + "\", \"messages\": [{\"role\": \"user\", \"content\": \"" + inputText + "\"}]}";
+        String postBody = "{\"model\": \"" + model + "\", " +
+                        "\"messages\": [" +
+                        "{\"role\": \"user\", " +
+                        "\"content\": \"" + inputText + "\"}" +
+                        "]" +
+                        "}";
 
         Request request = new Request.Builder()
                 .url("https://api.openai.com/v1/chat/completions")
@@ -120,8 +172,13 @@ public class GenerateActivity extends AppCompatActivity {
                         try {
                             jsonResponse = new JSONObject(responseData);
                             Log.d("TAG", jsonResponse.toString());
-                            String textResponse = jsonResponse.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
-                            Log.d("TAG", textResponse);
+                            parsedContent = parseResponse(jsonResponse.
+                                    getJSONArray("choices").
+                                    getJSONObject(0).
+                                    getJSONObject("message").
+                                    getString("content")
+                            );
+//                            Log.d("TAG", textResponse);
                             responseView.setText("영어 학습 준비 완료!");
                             nextBtn.setEnabled(true);
                             nextBtn.setVisibility(View.VISIBLE);
