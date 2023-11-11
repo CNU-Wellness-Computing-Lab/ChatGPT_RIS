@@ -10,6 +10,7 @@
     <string name="sex_title">성별</string>
     <string name="driving_exp_title">운전 실력</string>
     <string name="english_skill_title">영어 실력</string>
+    <string name="user_topic">학습 주제</string>
 
     <!-- Sync Preferences -->
     <string name="sync_title">Sync email periodically</string>
