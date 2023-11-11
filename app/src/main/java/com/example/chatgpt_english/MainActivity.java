@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity{
     private DataOutputStream dos;
     private DataInputStream dis;
 
-    private String ip = "192.168.56.1";            // IP 번호
+    //    private String ip = "192.168.56.1";            // IP 번호
     private int port = 12345;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity{
             public void run() {
                 // ip받기
                 String newip = String.valueOf(ip_edit.getText());
+                Log.w("서버", newip);
 
                 // 서버 접속
                 try {
@@ -78,13 +79,13 @@ public class MainActivity extends AppCompatActivity{
                     e1.printStackTrace();
                 }
 
-                Log.w("edit 넘어가야 할 값 : ","안드로이드에서 서버로 연결요청");
+                Log.w("서버","안드로이드에서 서버로 연결요청");
 
                 // Buffered가 잘못된듯.
                 try {
                     dos = new DataOutputStream(socket.getOutputStream());   // output에 보낼꺼 넣음
                     dis = new DataInputStream(socket.getInputStream());     // input에 받을꺼 넣어짐
-                    dos.writeUTF("안드로이드에서 서버로 연결요청");
+                    dos.writeUTF("안드로이드에서 서버로 연결요청 성공");
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -99,17 +100,17 @@ public class MainActivity extends AppCompatActivity{
                         int line2;
                         while (true) {
                             //line = (String) dis.readUTF();
-                            line2 = (int) dis.read();
+                            line2 = (int) dis.readUnsignedShort();
                             //Log.w("서버에서 받아온 값 ", "" + line);
                             //Log.w("서버에서 받아온 값 ", "" + line2);
-
                             if(line2 > 0) {
-                                Log.w("서버", "" + line2);
-                                dos.writeUTF("하나 받았습니다. : " + line2);
+                                Log.w("서버", "서버에서 받아온 값" + line2);
+//                                dos.writeUTF("하나 받았습니다. : " + line2);
+                                show_text.setText(line2+"");
                                 dos.flush();
                             }
-                            if(line2 == 99) {
-                                Log.w("서버", "" + line2);
+                            if(line2 == 999) {
+                                Log.w("서버", "소캣 종료, 받아온 값 : " + line2);
                                 socket.close();
                                 break;
                             }

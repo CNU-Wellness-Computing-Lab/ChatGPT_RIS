@@ -29,6 +29,7 @@
 
             <EditText
                 android:id="@+id/ip_edit"
+                android:text="192.168.0.7"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10" />
@@ -49,7 +50,8 @@
 
         <TextView
             android:id="@+id/show_text"
-            android:layout_width="wrap_content"
+            android:textColor="@color/white"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="25dp" />
     </LinearLayout>
