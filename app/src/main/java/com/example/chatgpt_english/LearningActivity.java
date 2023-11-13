@@ -21,6 +21,8 @@ public class LearningActivity extends AppCompatActivity {
     //test view
     TextView gptSentenceTextView;
     TextView sttResultTextView;
+
+    TextView learningResultTextView;
     Button regenerateTestBtn; // 사용자의 주제 변경 또는 더 많은 학습 컨텐츠가 필요한 경우에 사용
     Button nextSentenceTestBtn;
     Button playSentenceTestBtn;
@@ -43,6 +45,7 @@ public class LearningActivity extends AppCompatActivity {
         // UI element
         gptSentenceTextView = findViewById(R.id.testView);
         sttResultTextView = findViewById(R.id.testView2);
+        learningResultTextView = findViewById(R.id.testView3);
         regenerateTestBtn = findViewById(R.id.regenTestBtn);
         nextSentenceTestBtn = findViewById(R.id.nextTestBtn);
         playSentenceTestBtn = findViewById(R.id.playTestBtn);
@@ -59,6 +62,13 @@ public class LearningActivity extends AppCompatActivity {
             @Override
             public void onSTTError(String errorMessage) {
                 Log.d("LearningActivity", "STT Error \n" + errorMessage);
+            }
+
+            @Override
+            public void onLearningResult(String result) {
+                runOnUiThread(()->{
+                    learningResultTextView.setText(result);
+                });
             }
         });
         ttsModule = new TTSModule(this, this.sttModule);
