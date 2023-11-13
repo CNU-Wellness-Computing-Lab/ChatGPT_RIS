@@ -1,0 +1,41 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/messages_header">
+
+        <EditTextPreference
+            app:key="signature"
+            app:title="@string/signature_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="sex"
+            app:entries="@array/sex_entries"
+            app:entryValues="@array/sex_values"
+            app:key="sex"
+            app:title="@string/sex_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="driving_experience"
+            app:entries="@array/driving_exp_entries"
+            app:entryValues="@array/driving_exp_values"
+            app:key="driving_exp"
+            app:title="@string/driving_exp_title"
+            app:useSimpleSummaryProvider="true"
+            />
+        <ListPreference
+            app:defaultValue="english_skill"
+            app:entries="@array/english_skill_entries"
+            app:entryValues="@array/english_skill_values"
+            app:key="english_skill"
+            app:title="@string/english_skill_title"
+            app:useSimpleSummaryProvider="true"
+            />
+        <EditTextPreference
+            app:key="topic"
+            app:title="@string/user_topic"
+            app:useSimpleSummaryProvider="true"
+            />
+    </PreferenceCategory>
+
+</PreferenceScreen>
