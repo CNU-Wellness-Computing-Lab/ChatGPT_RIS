@@ -13,20 +13,60 @@
         android:id="@+id/testView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="waiting for response..."
+        android:text="waiting for GPT sentence"
         android:textSize="20dp"
+        android:layout_marginTop="100dp"
         android:gravity="center"
-        android:layout_weight="1"
         />
 
+    <TextView
+        android:id="@+id/testView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="waiting for speech-to-text result"
+        android:gravity="center"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        >
+        <Button
+            android:id="@+id/playTestBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="문장 재생"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
+            />
+        <Button
+            android:id="@+id/nextTestBtn"
+            android:text="다음 문장"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
+            />
+
+
+    </LinearLayout>
+
     <Button
-        android:id="@+id/testBtn"
+        android:id="@+id/regenTestBtn"
         android:text="재생성"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginBottom="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         />
+
+
 
 
 </LinearLayout>
