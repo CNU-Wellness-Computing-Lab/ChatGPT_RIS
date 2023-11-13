@@ -66,17 +66,17 @@ public class GenerateActivity extends AppCompatActivity {
         topic = sharedPreferences.getString("topic", "랜덤 주제");
 
         //TODO: 사용자 프로필 중 주제에 따른 영어 학습 컨텐츠 제공
-        Log.d("TAG", "driving skill= " + drivingSkill + "| english skill= " + englishSkill + "| topic= " + topic);
+        Log.d("GenerateActivity", "driving skill= " + drivingSkill + "| english skill= " + englishSkill + "| topic= " + topic);
 
         // GPT api response test
         String input = "당신의 역할은 '영어 학습 컨텐츠 제공자'입니다. " +
                 "운전 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 숙련자와 같다고 하고, " +
                 "영어 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 영어 언어학자 수준하고 같다고 해."+
                 "이때 사용자의 운전 실력은" + drivingSkill + " 영어 실력은" + englishSkill + " 주제는 "+ topic + "으로 설정할 때+" +
-                "사용자의 운전 실력과 영어 실력에 따라 영어 학습 문장 난이도를 조절하고, 주제메 맞는 영어 학습을 하기 위한 영어 문장 15개를 생성해줘."+
-                "단, 영어 단어의 개수가 서로 다른 15개의 문장을 생성해줘  (단어 개수 최소 3개, 최대 15개)" +
+                "사용자의 운전 실력과 영어 실력에 따라 영어 학습 문장 난이도를 조절하고, 주제메 맞는 영어 학습을 하기 위한 영어 문장 5개를 생성해줘."+
+                "단, 영어 단어의 개수가 서로 다른 5개의 문장을 생성해줘  (단어 개수 최소 3개, 최대 5개)" +
                 "출력 예시는 아래의 예시와 같이 학습을 위한 오직 영어 문장만 출력하고, 이 외 다른 응답은 출력하지마." +
-                "Again, you MUST only say the 15 english sentences for learning and do not contain numbering" +
+                "Again, you MUST only say the 5 english sentences for learning and do not contain numbering" +
                 "출력 예시 다음과 같아. I am a boy"
                 ;
         postRequest(input);
@@ -138,7 +138,7 @@ public class GenerateActivity extends AppCompatActivity {
      */
     private void postRequest(String inputText) {
         MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
-        String apiKey = "ADD API KEY HERE";
+        String apiKey = "PUT your API KEY here";
         String model = "gpt-4-1106-preview";
         String postBody = "{\"model\": \"" + model + "\", " +
                         "\"messages\": [" +
@@ -172,14 +172,13 @@ public class GenerateActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         try {
                             jsonResponse = new JSONObject(responseData);
-                            Log.d("TAG", jsonResponse.toString());
+                            Log.d("GenerateActivity", jsonResponse.toString());
                             parsedContent = parseResponse(jsonResponse.
                                     getJSONArray("choices").
                                     getJSONObject(0).
                                     getJSONObject("message").
                                     getString("content")
                             );
-//                            Log.d("TAG", textResponse);
                             responseView.setText("영어 학습 준비 완료!");
                             nextBtn.setEnabled(true);
                             nextBtn.setVisibility(View.VISIBLE);

@@ -13,61 +13,143 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.chatgpt_english.module.STTModule;
+import com.example.chatgpt_english.module.TTSModule;
+
 public class LearningActivity extends AppCompatActivity {
 
     //test view
-    TextView testView;
-    Button testBtn; // 사용자의 주제 변경 또는 더 많은 학습 컨텐츠가 필요한 경우에 사용
+    TextView gptSentenceTextView;
+    TextView sttResultTextView;
+    Button regenerateTestBtn; // 사용자의 주제 변경 또는 더 많은 학습 컨텐츠가 필요한 경우에 사용
+    Button nextSentenceTestBtn;
+    Button playSentenceTestBtn;
     private SharedPreferences sharedPreferences;
+
+    // tts-stt 모듈
+    private TTSModule ttsModule;
+    private STTModule sttModule;
+
+    private String[] parsedContent;
+    int contentUncompletedIdx = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_learning);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        testView = findViewById(R.id.testView);
-
-        String[] parsedContent = getIntent().getStringArrayExtra("parsed_content");
 
 
-        StringBuilder gptResponse = new StringBuilder();
-        try {
-            assert parsedContent != null;
-            for (String s : parsedContent){
-                gptResponse.append(s).append("\n");
-                Log.d("TAG", s + "\n");
+        // UI element
+        gptSentenceTextView = findViewById(R.id.testView);
+        sttResultTextView = findViewById(R.id.testView2);
+        regenerateTestBtn = findViewById(R.id.regenTestBtn);
+        nextSentenceTestBtn = findViewById(R.id.nextTestBtn);
+        playSentenceTestBtn = findViewById(R.id.playTestBtn);
+
+        sttModule = new STTModule(this, new STTModule.STTListener() {
+            @Override
+            public void onSTTResult(String result) {
+                runOnUiThread(()->{
+                    sttResultTextView.setText(result);
+                });
+                Log.d("LearningActivity", "STT result \n" + result);
             }
 
-            runOnUiThread(()->{
-                testView.setText(gptResponse.toString());
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
+            @Override
+            public void onSTTError(String errorMessage) {
+                Log.d("LearningActivity", "STT Error \n" + errorMessage);
+            }
+        });
+        ttsModule = new TTSModule(this, this.sttModule);
+
+        parsedContent = getIntent().getStringArrayExtra("parsed_content");
+        assert parsedContent != null;
+
+        StringBuilder gptResponse = new StringBuilder();
+        contentUncompletedIdx = 0;
+
+        // gptResponse 출력 (확인용)
+        for (String s : parsedContent) {
+            gptResponse.append(s).append("\n");
+            Log.d("LearningActivity", s + "\n");
         }
 
-        testBtn = findViewById(R.id.testBtn);
-        testBtn.setOnClickListener(new View.OnClickListener() {
+        // 재생성 페이지로 넘어가는 태스트 버튼
+        regenerateTestBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 returnToGenerateActivity("여행");
             }
         });
+
+        // text to speech 테스트 버튼
+        playSentenceTestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                runOnUiThread(() -> {
+                    if(contentUncompletedIdx < parsedContent.length){
+                        gptSentenceTextView.setText(sentenceToSpeech(parsedContent, contentUncompletedIdx));
+                    }
+                });
+                nextSentenceTestBtn.setVisibility(View.VISIBLE);
+            }
+        });
+
+        nextSentenceTestBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (contentUncompletedIdx < parsedContent.length-1){
+                    contentUncompletedIdx++;
+                    runOnUiThread(()->{
+                       gptSentenceTextView.setText(parsedContent[contentUncompletedIdx]);
+                       sttResultTextView.setText("waiting for speech-to-text result");
+
+                    });
+                }else{
+                    runOnUiThread(()->{
+                       gptSentenceTextView.setText("영어 학습 끝!");
+                    });
+                }
+            }
+        });
+
+    }
+
+    private void destroyTTSnSTT() {
+        if (ttsModule != null) {
+            ttsModule.shutdown();
+        }
+
+        if (sttModule != null) {
+            sttModule.destroy();
+        }
+    }
+
+    private String sentenceToSpeech(String[] _parsedContent, int _contentUncompletedIdx) {
+        String targetSentence = _parsedContent[_contentUncompletedIdx];
+
+        assert ttsModule != null;
+        Log.d("LearningActivity", targetSentence);
+        ttsModule.speak(targetSentence);
+        return targetSentence;
     }
 
     /**
      * 주제가 변경되거나 더 많은 학습 컨텐츠를 제공해야할 시, 호출되는 메서드
      * TODO: 사용자의 음성 명령에 따라 새로운 주제에 따라 재생성하는 동작 구현 필요
+     *
      * @param newTopic 사용자의 새로운 주제
      */
-    private void returnToGenerateActivity(String newTopic){
+    private void returnToGenerateActivity(String newTopic) {
         Intent intent = new Intent(this, GenerateActivity.class);
         //변경된 주제에 맞게 변경
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("topic", newTopic);
         editor.apply();
-
         startActivity(intent);
-        overridePendingTransition( R.anim.slide_in_left, R.anim.slide_out_right);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        destroyTTSnSTT();
     }
 
     @Override
@@ -85,5 +167,11 @@ public class LearningActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("아니오", null)
                 .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        destroyTTSnSTT();
     }
 }
