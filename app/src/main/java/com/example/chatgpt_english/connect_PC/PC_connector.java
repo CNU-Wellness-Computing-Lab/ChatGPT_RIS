@@ -7,7 +7,6 @@ import android.util.Log;
 import androidx.appcompat.app.WindowDecorActionBar;
 
 import com.example.chatgpt_english.MainActivity;
-import com.example.chatgpt_english.data.drivingData;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
