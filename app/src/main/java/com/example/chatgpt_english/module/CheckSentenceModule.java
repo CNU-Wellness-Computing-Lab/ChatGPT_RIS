@@ -2,7 +2,7 @@ package com.example.chatgpt_english.module;
 
 public class CheckSentenceModule {
     public String preprocess_sentence(String sentence) {
-        String cleanedSentence = sentence.replaceAll("[?.!]", "");
+        String cleanedSentence = sentence.replaceAll("[?.!]", "").toLowerCase();
 
         return cleanedSentence;
     }
