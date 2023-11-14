@@ -140,7 +140,7 @@ public class GenerateActivity extends AppCompatActivity {
      */
     private void postRequest(String inputText) {
         MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
-        String apiKey = "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";
+        String apiKey = "PUT your API KEY here";
         String model = "gpt-4-1106-preview";
         String postBody = "{\"model\": \"" + model + "\", " +
                         "\"messages\": [" +
