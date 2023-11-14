@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.chatgpt_english.connect_PC.PC_connector;
 import com.example.chatgpt_english.module.STTModule;
 import com.example.chatgpt_english.module.TTSModule;
 
@@ -21,7 +22,7 @@ public class LearningActivity extends AppCompatActivity {
     //test view
     TextView gptSentenceTextView;
     TextView sttResultTextView;
-
+    TextView cognitiveLoadTextView;
     TextView learningResultTextView;
     Button regenerateTestBtn; // 사용자의 주제 변경 또는 더 많은 학습 컨텐츠가 필요한 경우에 사용
     Button nextSentenceTestBtn;
@@ -49,7 +50,7 @@ public class LearningActivity extends AppCompatActivity {
         regenerateTestBtn = findViewById(R.id.regenTestBtn);
         nextSentenceTestBtn = findViewById(R.id.nextTestBtn);
         playSentenceTestBtn = findViewById(R.id.playTestBtn);
-
+        cognitiveLoadTextView = findViewById(R.id.cognitive_load);
         sttModule = new STTModule(this, new STTModule.STTListener() {
             @Override
             public void onSTTResult(String result) {
@@ -123,6 +124,25 @@ public class LearningActivity extends AppCompatActivity {
                 }
             }
         });
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!Thread.interrupted()){
+                    try{
+                        Thread.sleep(50);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                cognitiveLoadTextView.setText(PC_connector.speed+"");
+                            }
+                        });
+                    }catch (InterruptedException e){
+
+                    }
+                }
+            }
+        }).start();
 
     }
 
