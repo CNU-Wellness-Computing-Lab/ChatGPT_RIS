@@ -14,6 +14,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.chatgpt_english.connect_PC.PC_connector;
+
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -84,7 +86,7 @@ public class GenerateActivity extends AppCompatActivity {
         nextBtn.setOnClickListener((v) -> {
             Intent intent = new Intent(this, LearningActivity.class);
             intent.putExtra("parsed_content", parsedContent);
-
+            PC_connector.connect();
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
@@ -138,7 +140,7 @@ public class GenerateActivity extends AppCompatActivity {
      */
     private void postRequest(String inputText) {
         MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
-        String apiKey = "PUT your API KEY here";
+        String apiKey = "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";
         String model = "gpt-4-1106-preview";
         String postBody = "{\"model\": \"" + model + "\", " +
                         "\"messages\": [" +
