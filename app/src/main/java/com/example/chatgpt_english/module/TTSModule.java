@@ -17,6 +17,9 @@ public class TTSModule implements OnInitListener {
     private Context ttsContext;
     private STTModule sttModule;
 
+    // chat gpt가 생성한 문장
+    private String inputText;
+
     public TTSModule(Context context, STTModule _sttModule) {
         textToSpeech = new TextToSpeech(context, this);
         ttsContext = context;
@@ -39,7 +42,7 @@ public class TTSModule implements OnInitListener {
                 @Override
                 public void onDone(String utteranceId) {
                     assert sttModule != null;
-                    sttModule.startListening();
+                    sttModule.startListening(inputText);
                     Log.d("TTSModule", "TTS 완료: ");
                 }
 
@@ -65,6 +68,8 @@ public class TTSModule implements OnInitListener {
     }
 
     public void speak(String text) {
+        inputText = text;
+
         if (isInitialized) {
             String utteranceId = "utteranceId";
             textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId);

@@ -19,17 +19,25 @@ public class STTModule {
     private boolean isListening = false;
 
     private STTListener sttListener;
+
+    private CheckSentenceModule checkSentenceModule;
     private Handler mainThreadHandler;
+
+    // chat gpt가 생성한 문장
+    private String inputText;
 
     public interface STTListener {
         void onSTTResult(String result);
 
         void onSTTError(String errorMessage);
+
+        void onLearningResult(String result);
     }
 
     public STTModule(Context context, STTListener listener) {
         sttContext = context;
         sttListener = listener;
+        checkSentenceModule = new CheckSentenceModule();
         initializeSpeechRecognizer();
     }
 
@@ -83,6 +91,9 @@ public class STTModule {
                                 String result = matches.get(0);
                                 if (sttListener != null) {
                                     sttListener.onSTTResult(result);
+                                    String s1 = checkSentenceModule.preprocess_sentence(inputText);
+                                    String s2 = checkSentenceModule.preprocess_sentence(result);
+                                    sttListener.onLearningResult(String.valueOf(checkSentenceModule.calculateLevenshteinDistance(s1, s2)));
                                 }
                             }
                             isListening = false;
@@ -105,7 +116,9 @@ public class STTModule {
         }
     }
 
-    public void startListening() {
+    public void startListening(String input) {
+        inputText = input;
+
         if (!isListening) {
             isListening = true;
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
