@@ -13,6 +13,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.chatgpt_english.connect_PC.PC_connector;
 import com.example.chatgpt_english.module.STTModule;
 import com.example.chatgpt_english.module.TTSModule;
 
@@ -22,6 +23,7 @@ import java.util.Random;
 public class LearningActivity extends AppCompatActivity {
 
     //test view
+    TextView cognitiveLoadTextView;
     TextView ttsSentenceTextView;
     TextView sttResultTextView;
 
@@ -56,7 +58,7 @@ public class LearningActivity extends AppCompatActivity {
         ttsSentenceTextView = findViewById(R.id.testView);
         sttResultTextView = findViewById(R.id.testView2);
         learningResultTextView = findViewById(R.id.testView3);
-
+        cognitiveLoadTextView = findViewById(R.id.CognitiveLoad);
         sttModule = new STTModule(this, new STTModule.STTListener() {
             @Override
             public void onSTTResult(String result) {
@@ -179,7 +181,24 @@ public class LearningActivity extends AppCompatActivity {
         /*
          * ------ Test code ends -------
          */
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!Thread.interrupted()){
+                    try{
+                        Thread.sleep(50);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                cognitiveLoadTextView.setText(PC_connector.cognitiveLoad +"");
+                            }
+                        });
+                    }catch (InterruptedException e){
 
+                    }
+                }
+            }
+        }).start();
     }
 
     private void scheduleNextSentence(String[] _parsedContent) {

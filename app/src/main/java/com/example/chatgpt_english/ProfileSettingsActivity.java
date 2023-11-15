@@ -16,6 +16,8 @@ import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
+import com.example.chatgpt_english.connect_PC.PC_connector;
+
 public class ProfileSettingsActivity extends AppCompatActivity {
     private Button settingBtn;
 

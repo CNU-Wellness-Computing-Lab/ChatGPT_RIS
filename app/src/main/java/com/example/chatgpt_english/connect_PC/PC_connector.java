@@ -4,15 +4,9 @@ package com.example.chatgpt_english.connect_PC;
 import android.os.Handler;
 import android.util.Log;
 
-import androidx.appcompat.app.WindowDecorActionBar;
-
-import com.example.chatgpt_english.MainActivity;
-
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.Socket;
 
 public class PC_connector {
@@ -22,7 +16,7 @@ public class PC_connector {
     private static Socket socket;
     private static String newip = "192.168.0.44";
     private static int port = 12345;
-    public static double speed =0;
+    public static double cognitiveLoad =0;
     public static void connect(){
         mHandler = new Handler();
         Log.w("connect","연결 하는중");
@@ -60,7 +54,7 @@ public class PC_connector {
                         while (true) {
                             line2 = (int) dis.readUnsignedShort();
                             if(line2 > 0) {
-                                speed=(double)line2;
+                                cognitiveLoad =(double)line2;
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {

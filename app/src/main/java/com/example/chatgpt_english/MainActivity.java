@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.chatgpt_english.connect_PC.PC_connector;
+
 
 /**
  * Start of the Page
@@ -28,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void goToProfileSetting(){
         Intent intent = new Intent(this, ProfileSettingsActivity.class);
+        PC_connector.connect();
         startActivity(intent);
     }
 }
