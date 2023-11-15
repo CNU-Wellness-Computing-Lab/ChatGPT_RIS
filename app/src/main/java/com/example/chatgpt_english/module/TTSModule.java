@@ -6,7 +6,6 @@ import android.speech.tts.TextToSpeech.OnInitListener;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 
-import java.util.HashMap;
 import java.util.Locale;
 
 public class TTSModule implements OnInitListener {
@@ -20,10 +19,20 @@ public class TTSModule implements OnInitListener {
     // chat gpt가 생성한 문장
     private String inputText;
 
-    public TTSModule(Context context, STTModule _sttModule) {
-        textToSpeech = new TextToSpeech(context, this);
-        ttsContext = context;
-        sttModule = _sttModule;
+    private boolean isSetToKorean;
+
+    public TTSModule(Context context, STTModule _sttModule, boolean _isSetToKorean) {
+        this.textToSpeech = new TextToSpeech(context, this);
+        this.ttsContext = context;
+        this.sttModule = _sttModule;
+        this.isSetToKorean = _isSetToKorean;
+    }
+
+    public TTSModule(Context context){
+        this.textToSpeech = new TextToSpeech(context, this);
+        this.ttsContext = context;
+        this.sttModule = null;
+        this.isSetToKorean = false;
     }
 
     @Override
@@ -41,8 +50,10 @@ public class TTSModule implements OnInitListener {
 
                 @Override
                 public void onDone(String utteranceId) {
-                    assert sttModule != null;
-                    sttModule.startListening(inputText);
+                    if(sttModule != null) {
+                        Log.d("TTSModule", "isSetToKorean value: " + isSetToKorean);
+                        sttModule.startListening(inputText, isSetToKorean);
+                    }
                     Log.d("TTSModule", "TTS 완료: ");
                 }
 
