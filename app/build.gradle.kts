@@ -1,5 +1,7 @@
 plugins {
     id("com.android.application")
+    id("com.google.gms.google-services")
+
 }
 
 android {
@@ -8,8 +10,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.chatgpt_english"
-        minSdk = 24
-        targetSdk = 33
+        minSdk = 30
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -42,4 +44,15 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+
+    // Import the Firebase BoM
+
+
+    // TODO: Add the dependencies for Firebase products you want to use
+    // When using the BoM, don't specify versions in Firebase dependencies
+
+
+    // Add the dependencies for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
 }
