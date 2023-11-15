@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,6 +15,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ChatGPT_English"
         tools:targetApi="31">
+        <activity
+            android:name=".ResultActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LearningActivity"
+            android:exported="false" />
+        <activity
+            android:name=".GenerateActivity"
+            android:exported="false"
+            android:label="@string/title_activity_generate"
+            android:theme="@style/Theme.ChatGPT_English" />
+        <activity
+            android:name=".ProfileSettingsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_profile_settings" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
