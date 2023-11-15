@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -57,6 +58,7 @@ public class GenerateActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_generate);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         responseView = findViewById(R.id.responseView);
         handler = new Handler();
@@ -81,15 +83,12 @@ public class GenerateActivity extends AppCompatActivity {
                 "운전 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 숙련자와 같다고 하고, " +
                 "영어 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 영어 언어학자 수준하고 같다고 해." +
                 "이때 사용자의 운전 실력은" + drivingSkill + " 영어 실력은" + englishSkill + " 주제는 " + topic + "으로 설정할 때+" +
-                "사용자의 운전 실력과 영어 실력에 따라 영어 학습 문장 난이도를 조절하고, 주제메 맞는 영어 학습을 하기 위한 영어 문장 2개를 생성해줘." +
-                "단, 영어 단어의 개수가 서로 다른 2개의 문장을 생성해줘  (단어 개수 최소 3개, 최대 5개)" +
+                "사용자의 운전 실력과 영어 실력에 따라 영어 학습 문장 난이도를 조절하고, 주제메 맞는 영어 학습을 하기 위한 영어 문장 5개를 생성해줘." +
+                "단, 영어 단어의 개수가 서로 다른 5개의 문장을 생성해줘  (단어 개수 최소 3개, 최대 5개)" +
                 "출력 예시는 아래의 예시와 같이 학습을 위한 오직 영어 문장만 출력하고, 이 외 다른 응답은 출력하지마." +
-                "Again, you MUST only say the 2 english sentences for learning and do not contain numbering" +
+                "Again, you MUST only say the 5 english sentences for learning and do not contain numbering" +
                 "출력 예시 다음과 같아. I am a boy";
         postRequest(input);
-
-//        nextBtn.setOnClickListener((v) -> {
-//        });
     }
 
     private void goToLearningActivity() {
@@ -98,6 +97,12 @@ public class GenerateActivity extends AppCompatActivity {
 
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         ttsModule.shutdown();
     }
 
@@ -150,7 +155,7 @@ public class GenerateActivity extends AppCompatActivity {
      */
     private void postRequest(String inputText) {
         MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
-        String apiKey = "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";
+        String apiKey = "PUY your API Key";
         String model = "gpt-4-1106-preview";
         String postBody = "{\"model\": \"" + model + "\", " +
                 "\"messages\": [" +
@@ -198,8 +203,6 @@ public class GenerateActivity extends AppCompatActivity {
 
                             handler.postDelayed(() -> {goToLearningActivity();}, 10000);
 
-//                            nextBtn.setEnabled(true);
-//                            nextBtn.setVisibility(View.VISIBLE);
 
                         } catch (Exception e) {
                             responseView.setText("Failed to parse the response");

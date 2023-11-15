@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -47,6 +48,7 @@ public class LearningActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_learning);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         handler = new Handler();
         random = new Random();
@@ -268,7 +270,7 @@ public class LearningActivity extends AppCompatActivity {
      * @param _newTopic 사용자의 새로운 주제
      */
     private void returnToGenerateActivity(String _newTopic) {
-        destroyTTSnSTT();
+//        destroyTTSnSTT();
 
         Intent intent = new Intent(this, GenerateActivity.class);
         //변경된 주제에 맞게 변경
@@ -280,15 +282,19 @@ public class LearningActivity extends AppCompatActivity {
     }
 
     private void returnToGenerateActivity(){
-        destroyTTSnSTT();
 
         Intent intent = new Intent(this, GenerateActivity.class);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
-    private void goToResultActivity(){
+    @Override
+    protected void onPause() {
+        super.onPause();
         destroyTTSnSTT();
+    }
+
+    private void goToResultActivity(){
 
         Intent intent = new Intent(this, ResultActivity.class);
         startActivity(intent);
