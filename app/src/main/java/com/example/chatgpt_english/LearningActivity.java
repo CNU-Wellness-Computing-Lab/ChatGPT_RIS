@@ -202,8 +202,8 @@ public class LearningActivity extends AppCompatActivity {
             ttsModule.shutdown();
             ttsModule = new TTSModule(getApplicationContext(), sttModule, true);
 
-            scheduleNextSentence("영어 학습이 모두 완료되었습니다. 다음 새로운 학습을 진행하시겠습니까?" +
-                            " 계속 또는 아니오로 대답 해 주세요");
+            scheduleNextSentence("새로운 학습을 진행하시겠습니까?" +
+                            " 진행 또는 아니오로 대답 해 주세요");
         }
     }
 
@@ -245,6 +245,7 @@ public class LearningActivity extends AppCompatActivity {
         assert ttsModule != null;
         Log.d("LearningActivity", targetSentence);
         ttsModule.setLanguage(Locale.US);
+        ttsModule.setTextSpeechRate(0.8f);
         ttsModule.speak(targetSentence);
         return targetSentence;
     }

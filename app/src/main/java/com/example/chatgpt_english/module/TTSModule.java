@@ -78,6 +78,10 @@ public class TTSModule implements OnInitListener {
         }
     }
 
+    public void setTextSpeechRate(float rate){
+        this.textToSpeech.setSpeechRate(rate);
+    }
+
     public void speak(String text) {
         inputText = text;
 
