@@ -75,6 +75,7 @@ public class PC_connector {
 
             }
         };
-        checkUpdate.start();
+        // TODO: 실험 시 (또는 시뮬레이터 사용 시) 주석 해제
+//        checkUpdate.start();
     }
 }
