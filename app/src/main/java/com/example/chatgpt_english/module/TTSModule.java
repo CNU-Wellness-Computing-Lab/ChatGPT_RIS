@@ -67,6 +67,10 @@ public class TTSModule implements OnInitListener {
         }
     }
 
+    public void setTextSpeechRate(float rate){
+        this.textToSpeech.setSpeechRate(rate);
+    }
+
     public void setLanguage(Locale locale) {
         if (isInitialized) {
             int result = textToSpeech.setLanguage(locale);
