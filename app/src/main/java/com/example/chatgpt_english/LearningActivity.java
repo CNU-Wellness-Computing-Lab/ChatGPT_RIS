@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -17,11 +18,22 @@ import com.example.chatgpt_english.connect_PC.PC_connector;
 import com.example.chatgpt_english.module.STTModule;
 import com.example.chatgpt_english.module.TTSModule;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
 
 public class LearningActivity extends AppCompatActivity {
+    private final int MAX_LEARNING_COUNT = 3;       // 현재 주제에 학습 가능한 문장 수
+    private final int COG_RISK_THRESHOLD = 100;     // 인지 부하 100 초과 경우 '매우 높음'
+    private final int COG_HIGH_THRESHOLD = 75;      // 인지 부하 75 초과 경우 (75 <  <= 100) '높음'
+    private final int COG_MID_THRESHOLD = 50;       // 인지 부하 50 초과 경우 (50 <  <= 75) '중간'
 
+    private final int STATUS_RISK = 3;
+    private final int STATUS_HIGH = 2;
+    private final int STATUS_MID = 1;
+    private final int STATUS_LOW = 0;
+
+    // 인지 부하가 50보다 낮은 경우 '낮음'
     //test view
     TextView cognitiveLoadTextView;
     TextView ttsSentenceTextView;
@@ -40,15 +52,30 @@ public class LearningActivity extends AppCompatActivity {
     private STTModule sttModule;
 
     private String[] parsedContent;
-    int contentUncompletedIdx = -1;
 
-    // 0: 영어 학습 | 1: 학습 진행 여부 | 2: 새로운 토픽 여부 | 3: 새로운 토픽 묻기
-    int progressStatus = -1;
+    private ArrayList<Sentence> lowCognitiveContent;     // 인지 부하가 낮은 경우 재생될 문장
+
+    private ArrayList<Sentence> midCognitiveContent;     // 인지 부하가 중간인 경우 재생될 문장
+    private ArrayList<Sentence> highCognitiveContent;    // 인지 부하가 높은 경우 재생될 문장
+
+    private int lowIdx = -1;
+    private int midIdx = -1;
+    private int highIdx = -1;
+
+
+    int learnedCount = -1;
+
+    // 학습 진행 상황 파악하기 위한 변수
+    int progressStatus = -1;        // 0: 영어 학습 | 1: 학습 진행 여부 | 2: 새로운 토픽 여부 | 3: 새로운 토픽 묻기
+
+    // 사용자 인지 부하 정도를 파악하기 위한 변수
+    int userCognitiveStatus = -1;   // 0: 낮음 | 1: 중간 | 2: 높음 | 3: 매우 높음
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_learning);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         handler = new Handler();
         random = new Random();
@@ -59,6 +86,12 @@ public class LearningActivity extends AppCompatActivity {
         sttResultTextView = findViewById(R.id.testView2);
         learningResultTextView = findViewById(R.id.testView3);
         cognitiveLoadTextView = findViewById(R.id.CognitiveLoad);
+
+        // 인지 부하에 따른 학습 컨텐츠 선언
+        lowCognitiveContent = new ArrayList<>();
+        midCognitiveContent = new ArrayList<>();
+        highCognitiveContent = new ArrayList<>();
+
         sttModule = new STTModule(this, new STTModule.STTListener() {
             @Override
             public void onSTTResult(String result) {
@@ -90,9 +123,9 @@ public class LearningActivity extends AppCompatActivity {
                                 || result.equalsIgnoreCase("a new")
                                 || result.equalsIgnoreCase("I knew");
 
-                        switch (progressStatus){
+                        switch (progressStatus) {
                             case 1: // 학습 진행 여부 확인 (yes / no)
-                                if(isYes){
+                                if (isYes) {
                                     Log.d("LearningActivity", "새로운 영어 학습 진행");
                                     progressStatus = 2;
                                     scheduleNextSentence("새로운 주제로 영어 학습을 진행하시겠습니까? 진행 또는 아니오로 대답 해 주세요.");
@@ -107,7 +140,7 @@ public class LearningActivity extends AppCompatActivity {
                                 break;
 
                             case 2: // 새로운 토픽 확인 여부 확인 (yes / no)
-                                if(isYes){
+                                if (isYes) {
                                     Log.d("LearningActivity", "새로운 주제로 학습 진행");
                                     progressStatus = 3;
                                     scheduleNextSentence("새로운 주제를 말씀 해 주세요.");
@@ -128,7 +161,7 @@ public class LearningActivity extends AppCompatActivity {
                                 break;
                         }
                     } else {
-                        scheduleNextSentence(parsedContent);
+                        scheduleNextSentence();
                     }
                 });
                 Log.d("LearningActivity", "STT result \n" + result);
@@ -138,15 +171,26 @@ public class LearningActivity extends AppCompatActivity {
             public void onSTTError(String errorMessage) {
                 Log.d("LearningActivity", "STT Error \n" + errorMessage);
                 if (!sttModule.getExpectingYesNoAnswer()) {
-                    contentUncompletedIdx--;
-                    // 영어 학습 진행 중, 인식이 제대로 안된 경우 다시 진행 (progressStatus = 0)
+                    learnedCount--;
+                    switch (userCognitiveStatus) {
+                        case 2:
+                            highIdx--;
+                            break;
+                        case 1:
+                            midIdx--;
+                            break;
+                        case 0:
+                            lowIdx--;
+                            break;
+                        default:
+                    }
                     runOnUiThread(() -> {
-                        scheduleNextSentence(parsedContent);
+                        scheduleNextSentence();
                     });
-                }else{
+                } else {
                     // progressStatus = 1 / 2 / 3일때 처리 진행
-                    runOnUiThread(() ->{
-                       scheduleNextSentence("잘 못 알아들었습니다. 다시 한번 더 말씀 해 주세요");
+                    runOnUiThread(() -> {
+                        scheduleNextSentence("잘 못 알아들었습니다. 다시 한번 더 말씀 해 주세요");
                     });
                 }
             }
@@ -158,21 +202,25 @@ public class LearningActivity extends AppCompatActivity {
                 });
             }
         });
+
         ttsModule = new TTSModule(this, this.sttModule, false);
 
         parsedContent = getIntent().getStringArrayExtra("parsed_content");
-        assert parsedContent != null;
+        learnedCount = 0;
+        lowIdx = 0;
+        midIdx = 0;
+        highIdx = 0;
 
-        StringBuilder gptResponse = new StringBuilder();
-        contentUncompletedIdx = 0;
+        organizeContent(parsedContent); // GPT에서 생성된 문장 학습에 맞게 재구성
+        scheduleNextSentence();
 
-        scheduleNextSentence(parsedContent);
 
         /*
          * ----- test code starts ------
          */
 
         // gptResponse 출력 (확인용)
+        StringBuilder gptResponse = new StringBuilder();
         for (String s : parsedContent) {
             gptResponse.append(s).append("\n");
             Log.d("LearningActivity", s + "\n");
@@ -184,33 +232,152 @@ public class LearningActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (!Thread.interrupted()){
-                    try{
-                        Thread.sleep(50);
+                while (!Thread.interrupted()) {
+                    try {
+//                        Thread.sleep(50);
+                        Thread.sleep(1000);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                cognitiveLoadTextView.setText(PC_connector.cognitiveLoad +"");
+                                /*
+                                     TEST CODE STARTS
+                                 */
+                                PC_connector.cognitiveLoad = random.nextInt(130);
+                                /*
+                                     TEST CODE ENDS
+                                 */
+                                cognitiveLoadTextView.setText(PC_connector.cognitiveLoad + "");
                             }
                         });
-                    }catch (InterruptedException e){
-
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }
         }).start();
     }
 
-    private void scheduleNextSentence(String[] _parsedContent) {
-        int delay = random.nextInt(5000) + 3000;
-        if (contentUncompletedIdx < parsedContent.length) {
-            // 학습이 진행되고 있는 상황
-            handler.postDelayed(() -> {
-                runOnUiThread(() -> {
-                    ttsSentenceTextView.setText(sentenceToSpeech(_parsedContent, contentUncompletedIdx++));
-                });
-            }, delay);
+    /**
+     * GenerateActivity에서 생성된 GPT의 문장을 난이도에 맞게 학습 컨텐츠 재구성
+     *
+     * @param _parsedContent GPT에서 생성된 문장
+     */
+    private void organizeContent(String[] _parsedContent) {
+        /*
+         *  임의로 지정, 언제든 변경될 수 있도록 설정
+         */
 
+        /*
+            TEST CODE START
+         */
+        testDataOrganize();
+        /*
+            TEST CODE ENDS
+         */
+
+        /**
+        // 인지 부하에 따라 적용될 단어의 길이
+        // 인지 부하가 낮을 수록 단어 수가 많은 문장을 재생하며,
+        // 인비 부하가 높을 수록 단어 수가 적은 문장을 재생한다
+        final int LOW_COG_LEVEL = 5;
+        final int MID_COG_LEVEL = 4;
+        final int HIGH_COG_LEVEL = 3;
+
+        for (int idx = 0; idx < _parsedContent.length; idx++) {
+            int wordCount = _parsedContent[idx].split(" ").length;
+
+            switch (wordCount) {
+                case LOW_COG_LEVEL:
+                    lowCognitiveContent.add(new Sentence(_parsedContent[idx], 2));
+                    break;
+                case MID_COG_LEVEL:
+                    midCognitiveContent.add(new Sentence(_parsedContent[idx], 1));
+                    break;
+                case HIGH_COG_LEVEL:
+                    highCognitiveContent.add(new Sentence(_parsedContent[idx], 0));
+                    break;
+                default:
+                    Log.d("LearningActivity", "Unable to measure level");
+            }
+        }
+         **/
+    }
+
+
+    /**
+     * 테스트용 데이터. 실제 실험에서 사용되지 않을 메소드
+     */
+    private void testDataOrganize() {
+        highCognitiveContent.add(new Sentence("I am human", 0));
+        highCognitiveContent.add(new Sentence("I am machine", 0));
+        highCognitiveContent.add(new Sentence("I am student", 0));
+
+        midCognitiveContent.add(new Sentence("I am very excited", 1));
+        midCognitiveContent.add(new Sentence("I am very sad", 1));
+        midCognitiveContent.add(new Sentence("I am very happy", 1));
+
+        lowCognitiveContent.add(new Sentence("I am doing my work", 2));
+        lowCognitiveContent.add(new Sentence("I am doing my job", 2));
+        lowCognitiveContent.add(new Sentence("I am doing my chores", 2));
+    }
+
+    /**
+     * 다음 문장을 재생하기 위한 스케줄링 메소드
+     * 해당 메소드는 영어 학습 컨텐츠를 재생 할 때 ( progressStatus = 0 ) 사용 된다
+     */
+    private void scheduleNextSentence() {
+        int delay = random.nextInt(5000) + 3000;
+        final Sentence[] targetSentence = new Sentence[1];
+
+        if (learnedCount < MAX_LEARNING_COUNT) {
+            learnedCount++;
+            handler.postDelayed(() -> {
+                double currentCogLoad = PC_connector.cognitiveLoad;
+                if (currentCogLoad > COG_RISK_THRESHOLD) {
+                    // 인지 부하가 '매우 높음' 상태 => 학습 보류
+                    userCognitiveStatus = STATUS_RISK;
+                    Log.d("LearningActivity", "Driver status: Risky condition. Halt the content");
+                    runOnUiThread(() -> {
+                        ttsSentenceTextView.setText(
+                                "(인지 부하 매우 높음 상태: " + currentCogLoad + ")");
+                    });
+                    learnedCount--;
+                    scheduleNextSentence();
+                } else if (currentCogLoad > COG_HIGH_THRESHOLD) {
+                    // 인지 부하가 '높음' 상태 => 낮은 레벨 문장 학습
+                    Log.d("LearningActivity", "Driver status: High condition. Play low level sentence");
+                    userCognitiveStatus = STATUS_HIGH;
+                    targetSentence[0] = highCognitiveContent.get(highIdx);
+                    runOnUiThread(() -> {
+                        ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0].getSentence(), targetSentence[0].getLearningLevel())
+                                + "\n (인지 부하 높음 상태: " + currentCogLoad + ")"
+                        );
+                        highIdx++;
+                    });
+                } else if (currentCogLoad > COG_MID_THRESHOLD) {
+                    // 인지 부하가 '중간' 상태 => 중간 레벨 문장 학습
+                    Log.d("LearningActivity", "Driver status: Mid condition. Play mid level sentence");
+                    userCognitiveStatus = STATUS_MID;
+                    targetSentence[0] = midCognitiveContent.get(midIdx);
+                    runOnUiThread(() -> {
+                        ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0].getSentence(), targetSentence[0].getLearningLevel())
+                                + "\n (인지 부하 중간 상태: " + currentCogLoad + ")"
+                        );
+                        midIdx++;
+                    });
+                } else {
+                    // 인지 부하가 '낮음' 상태 => 낮음 레벨 문장 학습
+                    Log.d("LearningActivity", "Driver status: Low condition. Play high level sentence");
+                    userCognitiveStatus = STATUS_LOW;
+                    targetSentence[0] = lowCognitiveContent.get(lowIdx);
+                    runOnUiThread(() -> {
+                        ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0].getSentence(), targetSentence[0].getLearningLevel())
+                                + "\n (인지 부하 낮음 상태: " + currentCogLoad + ")"
+                        );
+                        lowIdx++;
+                    });
+                }
+            }, delay);
         } else {
             // 학습이 모두 종료된 상황 (영어 학습 단계 종료)
             progressStatus = 1;
@@ -219,11 +386,17 @@ public class LearningActivity extends AppCompatActivity {
             ttsModule.shutdown();
             ttsModule = new TTSModule(getApplicationContext(), sttModule, true);
 
-            scheduleNextSentence("영어 학습이 모두 완료되었습니다. 다음 새로운 학습을 진행하시겠습니까?" +
-                            " 계속 또는 아니오로 대답 해 주세요");
+            scheduleNextSentence("새로운 학습을 진행하시겠습니까?" +
+                    " 진행 또는 아니오로 대답 해 주세요");
         }
+
     }
 
+    /**
+     * 다음 문장을 재생하기 위한 스케줄링 메소드
+     * 다음 학습 관련 절차 수행 시 사용 된다 ( progressStatus > 1 )
+     * @param _sentence 재생 될 문장
+     */
     private void scheduleNextSentence(String _sentence) {
         int delay = 3000;
 
@@ -233,7 +406,6 @@ public class LearningActivity extends AppCompatActivity {
             });
         }, delay);
     }
-
 
 
     /**
@@ -272,8 +444,32 @@ public class LearningActivity extends AppCompatActivity {
      * @param _sentence 안내 메시지
      * @return 재생된 문장
      */
+    private String sentenceToSpeech(String _sentence, int _level) {
+        Log.d("LearningActivity", _sentence);
+
+        switch (_level) {
+            case 0: // 문장 레벨 0, 즉 인지 부하가 높음 상태에서 재생되는 문장
+                ttsModule.setTextSpeechRate(0.70f);
+                break;
+            case 1: // 문장 레벨 1, 즉 인지 부하가 중간 상태에서 재생되는 문장
+                ttsModule.setTextSpeechRate(0.80f);
+                break;
+            case 2: // 문장 레밸 2, 즉 인지 부하가 낮음 상태에서 재생되는 문장
+                ttsModule.setTextSpeechRate(0.90f);
+                break;
+            default:
+        }
+        ttsModule.setLanguage(Locale.US);
+        ttsModule.speak(_sentence);
+        return _sentence;
+    }
+
+    /**
+     * 문장을 재생하며, 한국어를 재생할 때 사용한다
+     * @param _sentence 재생할 문장 (한국어 )
+     * @return 재생된 문장
+     */
     private String sentenceToSpeech(String _sentence) {
-        assert ttsModule != null;
         Log.d("LearningActivity", _sentence);
         ttsModule.setLanguage(Locale.KOREA);
         ttsModule.speak(_sentence);
@@ -282,12 +478,10 @@ public class LearningActivity extends AppCompatActivity {
 
     /**
      * 주제가 변경되거나 더 많은 학습 컨텐츠를 제공해야할 시, 호출되는 메서드
-     * TODO: 사용자의 음성 명령에 따라 새로운 주제에 따라 재생성하는 동작 구현 필요
      *
      * @param _newTopic 사용자의 새로운 주제
      */
     private void returnToGenerateActivity(String _newTopic) {
-        destroyTTSnSTT();
 
         Intent intent = new Intent(this, GenerateActivity.class);
         //변경된 주제에 맞게 변경
@@ -298,16 +492,14 @@ public class LearningActivity extends AppCompatActivity {
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
-    private void returnToGenerateActivity(){
-        destroyTTSnSTT();
+    private void returnToGenerateActivity() {
 
         Intent intent = new Intent(this, GenerateActivity.class);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
-    private void goToResultActivity(){
-        destroyTTSnSTT();
+    private void goToResultActivity() {
 
         Intent intent = new Intent(this, ResultActivity.class);
         startActivity(intent);
@@ -315,8 +507,14 @@ public class LearningActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        destroyTTSnSTT();
+    }
+
+    @Override
     public void onBackPressed() {
-//        super.onBackPressed();
+//        super.onBackPressed(); -> 지우지 말 것
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle("앱 종료")
@@ -335,6 +533,7 @@ public class LearningActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
         destroyTTSnSTT();
     }
 }
