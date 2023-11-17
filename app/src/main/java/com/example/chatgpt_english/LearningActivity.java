@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -47,6 +48,7 @@ public class LearningActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_learning);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         handler = new Handler();
         random = new Random();
@@ -200,8 +202,8 @@ public class LearningActivity extends AppCompatActivity {
             ttsModule.shutdown();
             ttsModule = new TTSModule(getApplicationContext(), sttModule, true);
 
-            scheduleNextSentence("영어 학습이 모두 완료되었습니다. 다음 새로운 학습을 진행하시겠습니까?" +
-                            " 계속 또는 아니오로 대답 해 주세요");
+            scheduleNextSentence("새로운 학습을 진행하시겠습니까?" +
+                            " 진행 또는 아니오로 대답 해 주세요");
         }
     }
 
@@ -243,6 +245,7 @@ public class LearningActivity extends AppCompatActivity {
         assert ttsModule != null;
         Log.d("LearningActivity", targetSentence);
         ttsModule.setLanguage(Locale.US);
+        ttsModule.setTextSpeechRate(0.8f);
         ttsModule.speak(targetSentence);
         return targetSentence;
     }
@@ -268,7 +271,7 @@ public class LearningActivity extends AppCompatActivity {
      * @param _newTopic 사용자의 새로운 주제
      */
     private void returnToGenerateActivity(String _newTopic) {
-        destroyTTSnSTT();
+//        destroyTTSnSTT();
 
         Intent intent = new Intent(this, GenerateActivity.class);
         //변경된 주제에 맞게 변경
@@ -280,15 +283,19 @@ public class LearningActivity extends AppCompatActivity {
     }
 
     private void returnToGenerateActivity(){
-        destroyTTSnSTT();
 
         Intent intent = new Intent(this, GenerateActivity.class);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
-    private void goToResultActivity(){
+    @Override
+    protected void onPause() {
+        super.onPause();
         destroyTTSnSTT();
+    }
+
+    private void goToResultActivity(){
 
         Intent intent = new Intent(this, ResultActivity.class);
         startActivity(intent);
