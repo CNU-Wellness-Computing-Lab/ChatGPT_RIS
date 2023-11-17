@@ -205,6 +205,7 @@ public class LearningActivity extends AppCompatActivity {
                     }
 
                     addData(lDist + "", currentCycle + "");
+                    flushData();
 
                     if(dataSB.toString().split(",").length > 8){
                         flushData();
@@ -284,7 +285,12 @@ public class LearningActivity extends AppCompatActivity {
 
     private void flushData(){
         if(dataSB != null) {
-            CSVModule.writeCsvFile(getApplicationContext(), "English_Learning_withoutCog.csv", dataSB.toString());
+            if(dataSB.toString().split(",").length > 8){
+                CSVModule.writeCsvFile(getApplicationContext(), "English_Learning_withoutCog.csv", dataSB.toString());
+            }else {
+                Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
+                        + "deleting current data...");
+            }
         }
         resetData();
     }
@@ -445,7 +451,6 @@ public class LearningActivity extends AppCompatActivity {
         ttsModule.shutdown();
         ttsModule = new TTSModule(getApplicationContext(), sttModule, true);
 
-//        dataSB = null;
         handler.postDelayed(() -> {
             runOnUiThread(() -> {
                 ttsSentenceTextView.setText(sentenceToSpeech(_sentence));
