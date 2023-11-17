@@ -38,44 +38,13 @@
         android:gravity="center"
         android:text="user's learning result" />
 
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal"-->
-<!--        android:gravity="center"-->
-<!--        >-->
-<!--&lt;!&ndash;        <Button&ndash;&gt;-->
-<!--&lt;!&ndash;            android:id="@+id/playTestBtn"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_width="wrap_content"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_height="wrap_content"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:text="문장 재생"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_marginRight="5dp"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_marginLeft="5dp"&ndash;&gt;-->
-<!--&lt;!&ndash;            />&ndash;&gt;-->
-<!--&lt;!&ndash;        <Button&ndash;&gt;-->
-<!--&lt;!&ndash;            android:id="@+id/nextTestBtn"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:text="다음 문장"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_width="wrap_content"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_height="wrap_content"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:visibility="gone"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_marginRight="5dp"&ndash;&gt;-->
-<!--&lt;!&ndash;            android:layout_marginLeft="5dp"&ndash;&gt;-->
-<!--&lt;!&ndash;            />&ndash;&gt;-->
-
-
-<!--    </LinearLayout>-->
-
-<!--    <Button-->
-<!--        android:id="@+id/regenTestBtn"-->
-<!--        android:text="재생성"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:gravity="center"-->
-<!--        android:layout_marginTop="10dp"-->
-<!--        android:layout_marginBottom="10dp"-->
-<!--        />-->
-
-
-
+    <TextView
+        android:id="@+id/testView4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="user's cognitive load"
+        />
 
 </LinearLayout>

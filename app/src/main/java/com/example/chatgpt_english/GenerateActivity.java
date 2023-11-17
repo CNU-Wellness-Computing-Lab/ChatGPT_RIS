@@ -42,11 +42,12 @@ public class GenerateActivity extends AppCompatActivity {
     private TextView responseView;
     private OkHttpClient client;
     private SharedPreferences sharedPreferences;
-    private Button nextBtn;
+    private SharedPreferences.Editor editor;
 
     private String drivingSkill;
     private String englishSkill;
     private String topic;
+    private int cycle;
 
     private JSONObject jsonResponse;
     private String[] parsedContent;
@@ -64,19 +65,19 @@ public class GenerateActivity extends AppCompatActivity {
         handler = new Handler();
         ttsModule = new TTSModule(this);
 
+
         client = new OkHttpClient.Builder()
                 .readTimeout(60, TimeUnit.SECONDS)
                 .connectTimeout(60, TimeUnit.SECONDS)
                 .build();
 
-        nextBtn = findViewById(R.id.nextBtn);
-        nextBtn.setEnabled(false);
 
         drivingSkill = sharedPreferences.getString("driving_exp", "1");
         englishSkill = sharedPreferences.getString("english_skill", "1");
         topic = sharedPreferences.getString("topic", "랜덤 주제");
+        cycle = increaseLearningCycle();
 
-        Log.d("GenerateActivity", "driving skill= " + drivingSkill + "| english skill= " + englishSkill + "| topic= " + topic);
+        Log.d("GenerateActivity", "driving skill= " + drivingSkill + "| english skill= " + englishSkill + "| topic= " + topic + "| cycle= " + cycle );
 
         // GPT api response test
         String input = "당신의 역할은 '영어 학습 컨텐츠 제공자'입니다. " +
@@ -89,6 +90,14 @@ public class GenerateActivity extends AppCompatActivity {
                 "Again, you MUST only say the 3 english sentences for learning and do not contain numbering" +
                 "출력 예시 다음과 같아. I am a boy";
         postRequest(input);
+    }
+
+    private int increaseLearningCycle(){
+        editor = sharedPreferences.edit();
+        editor.putInt("Cycle", (sharedPreferences.getInt("Cycle", -2) + 1));
+        editor.apply();
+
+        return sharedPreferences.getInt("Cycle", -1);
     }
 
     private void goToLearningActivity() {
@@ -155,7 +164,7 @@ public class GenerateActivity extends AppCompatActivity {
      */
     private void postRequest(String inputText) {
         MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
-        String apiKey = "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";
+        String apiKey = "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";
         String model = "gpt-4-1106-preview";
         String postBody = "{\"model\": \"" + model + "\", " +
                 "\"messages\": [" +

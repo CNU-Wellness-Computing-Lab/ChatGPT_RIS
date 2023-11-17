@@ -18,11 +18,15 @@ import androidx.preference.PreferenceManager;
 
 public class ProfileSettingsActivity extends AppCompatActivity {
     private Button settingBtn;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        resetLearningCycle();
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.RECORD_AUDIO}, 0);
@@ -44,6 +48,12 @@ public class ProfileSettingsActivity extends AppCompatActivity {
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
+    }
+
+    private void resetLearningCycle(){
+        editor = sharedPreferences.edit();
+        editor.putInt("Cycle", 0);
+        editor.apply();
     }
 
     @Override
