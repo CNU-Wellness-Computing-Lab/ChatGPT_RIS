@@ -550,7 +550,7 @@ public class LearningActivity extends AppCompatActivity {
                 break;
             case 2: // 문장 레밸 2, 즉 인지 부하가 낮음 상태에서 재생되는 문장
                 Log.d("LearningActivity", "sentence for low level sentence... set speed reate to 0.85f");
-                ttsModule.setTextSpeechRate(0.90f);
+                ttsModule.setTextSpeechRate(0.85f);
                 break;
             default:
         }
