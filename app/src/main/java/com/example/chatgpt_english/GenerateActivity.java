@@ -86,9 +86,10 @@ public class GenerateActivity extends AppCompatActivity {
                 "운전 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 숙련자와 같다고 하고, " +
                 "영어 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 영어 언어학자 수준하고 같다고 해." +
                 "이때 사용자의 운전 실력은" + drivingSkill + " 영어 실력은" + englishSkill + " 주제는 " + topic + "으로 설정할 때+" +
-                "사용자의 영어 실력에 따라 생성되는 영어 문장의 어휘 수준을 결정해주세요."+
-                "5단어의 문장, 10단어의 문장, 15단어의 문장을 각각 5문장 생성해 주세요." +
-                "출력시 JSON Object로 반환하며, key값으로는 '5단어', '10단어', '15단어'로 하여 반환해줘"+
+                "사용자의 영어 실력과 운전 실력에 따라 생성되는 영어 문장의 어휘 수준을 결정해주세요."+
+                "사용자가 설정한 주제에 맞춰 영어 문장을 생성해 주세요." +
+                "3단어의 문장, 5단어의 문장, 7단어의 문장을 각각 20문장 생성해 주세요." +
+                "출력시 JSON Object로 반환하며, key값으로는 '3단어', '5단어', '7단어'로 하여 반환해줘"+
                 "출력할때 학습을 위한 오직 영어 문장만 출력하고(JSON Object만), 이 외 다른 응답은 출력하지마.";
         postRequest(input);
     }
@@ -137,17 +138,16 @@ public class GenerateActivity extends AppCompatActivity {
     public String[] parseResponse(String response) throws JSONException {
         //난이도 파싱
         //```json ~ ``` 중간 부분 추출
-        response = response.substring(7,response.length()-3);
+        //```json ~ ``` 중간 부분 추출
+        if(response.startsWith("```json")) {
+            response = response.substring(7, response.length() - 3);
+        }
         //Json 재변환
         jsonResponse = new JSONObject(response);
-        JSONArray parsedResponse5 = jsonResponse.getJSONArray("5단어");
-        JSONArray parsedResponse10 = jsonResponse.getJSONArray("10단어");
-        JSONArray parsedResponse15 = jsonResponse.getJSONArray("15단어");
+        JSONArray parsedResponse5 = jsonResponse.getJSONArray("3단어");
+        JSONArray parsedResponse10 = jsonResponse.getJSONArray("5단어");
+        JSONArray parsedResponse15 = jsonResponse.getJSONArray("7단어");
 
-
-
-//        String[] parsedResponse = parsedResponse5;
-//        Log.d("parseResponse", response+"");
         ArrayList<String> finalResponse = new ArrayList<>();
         //check parsing error
         for (int i = 0; i < parsedResponse5.length(); i++) {
@@ -180,7 +180,7 @@ public class GenerateActivity extends AppCompatActivity {
      */
     private void postRequest(String inputText) {
         MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
-        String apiKey = "";
+        String apiKey = "PUT API KEY HERE";
         String model = "gpt-4-1106-preview";
         String postBody = "{\"model\": \"" + model + "\", " +
                 "\"messages\": [" +

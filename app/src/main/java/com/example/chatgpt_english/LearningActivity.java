@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.Random;
 
 public class LearningActivity extends AppCompatActivity {
-    private final int MAX_LEARNING_COUNT = 3;       // 현재 주제에 학습 가능한 문장 수
+    private final int MAX_LEARNING_COUNT = 8;       // 현재 주제에 학습 가능한 문장 수
     private final int COG_RISK_THRESHOLD = 100;     // 인지 부하 100 초과 경우 '매우 높음'
     private final int COG_HIGH_THRESHOLD = 75;      // 인지 부하 75 초과 경우 (75 <  <= 100) '높음'
     private final int COG_MID_THRESHOLD = 50;       // 인지 부하 50 초과 경우 (50 <  <= 75) '중간'
@@ -75,7 +75,7 @@ public class LearningActivity extends AppCompatActivity {
         editor = sharedPreferences.edit();
         handler = new Handler();
         random = new Random();
-
+        Log.d("LearningActivity", "onCreate called on LearningActivity");
         progressStatus = 0;
         currentCycle = sharedPreferences.getInt("Cycle", -1);
 
@@ -112,6 +112,7 @@ public class LearningActivity extends AppCompatActivity {
 
                         boolean isNo = result.equalsIgnoreCase("no") || result.equals("노")
                                 || result.equals("아니") || result.equals("아니오") || result.equals("아니요")
+                                || result.equals("그만")
                                 || result.equals("중지") || result.equals("충치") || result.equalsIgnoreCase("twenty")
                                 || result.equals("20") || result.equalsIgnoreCase("jonsey")
                                 || result.equalsIgnoreCase("johnsey")
@@ -178,8 +179,8 @@ public class LearningActivity extends AppCompatActivity {
                      * 데이터 Add (학습 결과 )
                      * & Write
                      */
-                    // 영어 문장을 말한 것이 아니므로 정답: "Error", LDistance: "-1", "(현재 학습 Cycle)"
-                    addData("ERROR", "-1", currentCycle + "");
+                    // 영어 문장을 말한 것이 아니므로 정답: "ERROR, "ERROR", LDistance: "-1", "(현재 학습 Cycle)"
+                    addData("ERROR", "ERROR", "-1", currentCycle + "");
                     flushData();
 
                     runOnUiThread(() -> {
@@ -196,11 +197,14 @@ public class LearningActivity extends AppCompatActivity {
             @Override
             public void onLearningResult(String result) {
                 if(progressStatus <= 1) {
+                    String answerResult = "";
                     int lDist = Integer.parseInt(result);
 
                     if (lDist < 11) {
+                        answerResult += "\nCORRECT";
                         addData("CORRECT");
                     } else {
+                        answerResult += "\nWrong";
                         addData("WRONG");
                     }
 
@@ -215,8 +219,9 @@ public class LearningActivity extends AppCompatActivity {
                         dataSB = new StringBuilder();
                     }
 
+                    String finalAnswerResult = answerResult;
                     runOnUiThread(() -> {
-                        learningResultTextView.setText(result);
+                        learningResultTextView.setText(result + finalAnswerResult);
                     });
                 }
             }
@@ -276,7 +281,7 @@ public class LearningActivity extends AppCompatActivity {
     private void addData(String... _data){
         if(dataSB != null){
             for (String s: _data){
-                dataSB.append(s).append(", ");
+                dataSB.append(s).append(",  ");
             }
             Log.d("LearningActivity", "Added Data. Current data: \n"
                     + dataSB.toString());
@@ -285,7 +290,7 @@ public class LearningActivity extends AppCompatActivity {
 
     private void flushData(){
         if(dataSB != null) {
-            if(dataSB.toString().split(",").length > 8){
+            if(dataSB.toString().split(",  ").length > 8){
                 CSVModule.writeCsvFile(getApplicationContext(), "English_Learning_withoutCog.csv", dataSB.toString());
             }else {
                 Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
@@ -312,38 +317,30 @@ public class LearningActivity extends AppCompatActivity {
         /*
             TEST CODE START
          */
-        testDataOrganize();
+//        testDataOrganize();
         /*
             TEST CODE ENDS
          */
 
-        /**
          // FIXME: 적절한 단어 개수 (기준)으로 변경
          // 인지 부하에 따라 적용될 단어의 길이
          // 인지 부하가 낮을 수록 단어 수가 많은 문장을 재생하며,
          // 인비 부하가 높을 수록 단어 수가 적은 문장을 재생한다
-         final int LOW_COG_LEVEL = 5;
-         final int MID_COG_LEVEL = 4;
-         final int HIGH_COG_LEVEL = 3;
+         final int LOW_COG_WORD_COUNT = 7;
+         final int MID_COG_WORD_COUNT = 5;
+         final int HIGH_COG_WORD_COUNT = 3;
 
          for (int idx = 0; idx < _parsedContent.length; idx++) {
              int wordCount = _parsedContent[idx].split(" ").length;
 
-             switch (wordCount) {
-             case LOW_COG_LEVEL:
-                 learningContent.add(new Sentence(_parsedContent[idx], 2));
-                 break;
-             case MID_COG_LEVEL:
-                 learningContent.add(new Sentence(_parsedContent[idx], 1));
-                 break;
-             case HIGH_COG_LEVEL:
+             if(wordCount <= HIGH_COG_WORD_COUNT){
                  learningContent.add(new Sentence(_parsedContent[idx], 0));
-                 break;
-             default:
-                Log.d("LearningActivity", "Unable to measure level");
+             } else if (wordCount <= MID_COG_WORD_COUNT){
+                 learningContent.add(new Sentence(_parsedContent[idx], 1));
+             } else {
+                 learningContent.add(new Sentence(_parsedContent[idx], 2));
              }
          }
-        **/
 
         Collections.shuffle(learningContent);
     }
@@ -385,6 +382,8 @@ public class LearningActivity extends AppCompatActivity {
                  */
                 addData(
                         System.currentTimeMillis() + "",
+                        sharedPreferences.getString("driving_exp", "-1"),
+                        sharedPreferences.getString("english_skill", "-1"),
                         targetSentence[0].getSentence(),
                         targetSentence[0].getLearningLevel() + "",
                         sharedPreferences.getString("topic", "unknown"),
@@ -397,7 +396,7 @@ public class LearningActivity extends AppCompatActivity {
                     addData("RISK");
                     runOnUiThread(() -> {
                         ttsSentenceTextView.setText( sentenceToSpeech(targetSentence[0])
-                                + "(인지 부하 매우 높음 상태: " + currentCogLoad + ")");
+                                + "\n (인지 부하 매우 높음 상태: " + currentCogLoad + ")");
                     });
                 } else if (currentCogLoad > COG_HIGH_THRESHOLD) {
                     // 인지 부하가 '높음' 상태 => 낮은 레벨 문장 학습
@@ -481,13 +480,16 @@ public class LearningActivity extends AppCompatActivity {
         Log.d("LearningActivity", _sentence.getSentence());
         switch (_sentence.getLearningLevel()) {
             case 0: // 문장 레벨 0, 즉 인지 부하가 높음 상태에서 재생되는 문장
-                ttsModule.setTextSpeechRate(0.70f);
+                Log.d("LearningActivity", "Sentence for high cog status... set speed reate to 0.75f");
+                ttsModule.setTextSpeechRate(0.75f);
                 break;
             case 1: // 문장 레벨 1, 즉 인지 부하가 중간 상태에서 재생되는 문장
+                Log.d("LearningActivity", "Sentence for mid level sentence... set speed reate to 0.80f");
                 ttsModule.setTextSpeechRate(0.80f);
                 break;
             case 2: // 문장 레밸 2, 즉 인지 부하가 낮음 상태에서 재생되는 문장
-                ttsModule.setTextSpeechRate(0.90f);
+                Log.d("LearningActivity", "sentence for low level sentence... set speed reate to 0.85f");
+                ttsModule.setTextSpeechRate(0.85f);
                 break;
             default:
         }
@@ -526,7 +528,6 @@ public class LearningActivity extends AppCompatActivity {
     }
 
     private void returnToGenerateActivity() {
-
         Intent intent = new Intent(this, GenerateActivity.class);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
@@ -542,6 +543,7 @@ public class LearningActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d("LearningActivity", "onPause called on LearningActivity");
         destroyTTSnSTT();
     }
 
@@ -566,6 +568,7 @@ public class LearningActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d("LearningActivity", "onDestroy called on LearningActivity");
         handler.removeCallbacksAndMessages(null);
         destroyTTSnSTT();
     }
