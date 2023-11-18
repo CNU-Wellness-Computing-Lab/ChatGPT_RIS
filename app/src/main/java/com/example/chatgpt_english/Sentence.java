@@ -7,6 +7,7 @@ public class Sentence {
     private final String sentence;
     private boolean isLearned;
     private final int learningLevel;      // 영어 학습 문장의 난이도. 높을 수록 낮은 인지 부하일 때 재생 되도록 한다
+    // level = 0 -> 높은 인지 부하 | level = 1 -> 중간 인지 부하 | level = 2 -> 낮은 인지 부하
 
     public Sentence(String _sentence, int _learningLevel){
         this.sentence = _sentence;

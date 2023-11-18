@@ -53,8 +53,9 @@ public class ResultActivity extends AppCompatActivity {
                 .setPositiveButton("예", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        onDestroy();
+                        onPause();
                         finishAffinity();
+                        onDestroy();
                     }
                 })
                 .setNegativeButton("아니오", null)

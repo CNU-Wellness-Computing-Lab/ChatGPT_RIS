@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.chatgpt_english.connect_PC.PC_connector;
+import com.example.chatgpt_english.module.CSVModule;
 import com.example.chatgpt_english.module.STTModule;
 import com.example.chatgpt_english.module.TTSModule;
 
@@ -23,7 +24,7 @@ import java.util.Locale;
 import java.util.Random;
 
 public class LearningActivity extends AppCompatActivity {
-    private final int MAX_LEARNING_COUNT = 3;       // 현재 주제에 학습 가능한 문장 수
+    private final int MAX_LEARNING_COUNT = 5;       // 현재 주제에 학습 가능한 문장 수
     private final int COG_RISK_THRESHOLD = 100;     // 인지 부하 100 초과 경우 '매우 높음'
     private final int COG_HIGH_THRESHOLD = 75;      // 인지 부하 75 초과 경우 (75 <  <= 100) '높음'
     private final int COG_MID_THRESHOLD = 50;       // 인지 부하 50 초과 경우 (50 <  <= 75) '중간'
@@ -40,10 +41,8 @@ public class LearningActivity extends AppCompatActivity {
     TextView sttResultTextView;
 
     TextView learningResultTextView;
-    Button regenerateTestBtn; // 사용자의 주제 변경 또는 더 많은 학습 컨텐츠가 필요한 경우에 사용
-    Button nextSentenceTestBtn;
-    Button playSentenceTestBtn;
     private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
     private Handler handler;
     private Random random;
 
@@ -70,6 +69,8 @@ public class LearningActivity extends AppCompatActivity {
 
     // 사용자 인지 부하 정도를 파악하기 위한 변수
     int userCognitiveStatus = -1;   // 0: 낮음 | 1: 중간 | 2: 높음 | 3: 매우 높음
+    int currentCycle = -1;
+    StringBuilder dataSB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,9 +78,11 @@ public class LearningActivity extends AppCompatActivity {
         setContentView(R.layout.activity_learning);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editor = sharedPreferences.edit();
         handler = new Handler();
         random = new Random();
         progressStatus = 0;
+        currentCycle = sharedPreferences.getInt("Cycle", -1);
 
         // UI element
         ttsSentenceTextView = findViewById(R.id.testView);
@@ -91,6 +94,9 @@ public class LearningActivity extends AppCompatActivity {
         lowCognitiveContent = new ArrayList<>();
         midCognitiveContent = new ArrayList<>();
         highCognitiveContent = new ArrayList<>();
+
+        // CSV에 저장 될 data 선언
+        dataSB = new StringBuilder();
 
         sttModule = new STTModule(this, new STTModule.STTListener() {
             @Override
@@ -161,6 +167,10 @@ public class LearningActivity extends AppCompatActivity {
                                 break;
                         }
                     } else {
+                        /**
+                         * 데이터 Add (인식 결과 )
+                         */
+                        addData(result);
                         scheduleNextSentence();
                     }
                 });
@@ -184,6 +194,14 @@ public class LearningActivity extends AppCompatActivity {
                             break;
                         default:
                     }
+                    /**
+                     * 데이터 Add (학습 결과 )
+                     * & Write
+                     */
+                    // 영어 문장을 말한 것이 아니므로 정답: "ERROR", "ERROR", LDistance: "-1", "(현재 학습 Cycle)"
+                    addData("ERROR","ERROR", "-1", currentCycle + "");
+                    flushData();
+
                     runOnUiThread(() -> {
                         scheduleNextSentence();
                     });
@@ -197,9 +215,34 @@ public class LearningActivity extends AppCompatActivity {
 
             @Override
             public void onLearningResult(String result) {
-                runOnUiThread(() -> {
-                    learningResultTextView.setText(result);
-                });
+                if(progressStatus <= 1) {
+                    String answerResult = "";
+                    int lDist = Integer.parseInt(result);
+
+                    if (lDist < 11) {
+                        answerResult += "\nCORRECT";
+                        addData("CORRECT");
+                    } else {
+                        answerResult += "\nWrong";
+                        addData("WRONG");
+                    }
+
+                    addData(lDist + "", currentCycle + "");
+                    flushData();
+
+                    if(dataSB.toString().split(",").length > 8){
+                        flushData();
+                    }else {
+                        Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
+                                + "deleting current data...");
+                        dataSB = new StringBuilder();
+                    }
+
+                    String finalAnswerResult = answerResult;
+                    runOnUiThread(() -> {
+                        learningResultTextView.setText(result + finalAnswerResult);
+                    });
+                }
             }
         });
 
@@ -257,6 +300,33 @@ public class LearningActivity extends AppCompatActivity {
         }).start();
     }
 
+    private void addData(String... _data){
+        if(dataSB != null){
+            for (String s: _data){
+                dataSB.append(s).append(",  ");
+            }
+            Log.d("LearningActivity", "Added Data. Current data: \n"
+                    + dataSB.toString());
+        }
+    };
+
+    private void flushData(){
+        if(dataSB != null) {
+            if(dataSB.toString().split(",  ").length > 8){
+                CSVModule.writeCsvFile(getApplicationContext(), "English_Learning_withCog.csv", dataSB.toString());
+            }else {
+                Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
+                        + "deleting current data...");
+            }
+        }
+        resetData();
+    }
+
+    private void resetData(){
+        dataSB = new StringBuilder();
+    }
+
+
     /**
      * GenerateActivity에서 생성된 GPT의 문장을 난이도에 맞게 학습 컨텐츠 재구성
      *
@@ -270,37 +340,29 @@ public class LearningActivity extends AppCompatActivity {
         /*
             TEST CODE START
          */
-        testDataOrganize();
+//        testDataOrganize();
         /*
             TEST CODE ENDS
          */
 
-        /**
         // 인지 부하에 따라 적용될 단어의 길이
         // 인지 부하가 낮을 수록 단어 수가 많은 문장을 재생하며,
         // 인비 부하가 높을 수록 단어 수가 적은 문장을 재생한다
-        final int LOW_COG_LEVEL = 5;
-        final int MID_COG_LEVEL = 4;
-        final int HIGH_COG_LEVEL = 3;
+        final int LOW_COG_WORD_COUNT = 7;
+        final int MID_COG_WORD_COUNT = 5;
+        final int HIGH_COG_WORD_COUNT = 3;
 
         for (int idx = 0; idx < _parsedContent.length; idx++) {
             int wordCount = _parsedContent[idx].split(" ").length;
 
-            switch (wordCount) {
-                case LOW_COG_LEVEL:
-                    lowCognitiveContent.add(new Sentence(_parsedContent[idx], 2));
-                    break;
-                case MID_COG_LEVEL:
-                    midCognitiveContent.add(new Sentence(_parsedContent[idx], 1));
-                    break;
-                case HIGH_COG_LEVEL:
-                    highCognitiveContent.add(new Sentence(_parsedContent[idx], 0));
-                    break;
-                default:
-                    Log.d("LearningActivity", "Unable to measure level");
+            if( wordCount <= HIGH_COG_WORD_COUNT){
+                highCognitiveContent.add(new Sentence(_parsedContent[idx], 0));
+            } else if (wordCount <= MID_COG_WORD_COUNT){
+                midCognitiveContent.add(new Sentence(_parsedContent[idx], 1));
+            }else {
+                lowCognitiveContent.add(new Sentence(_parsedContent[idx],2));
             }
         }
-         **/
     }
 
 
@@ -331,8 +393,17 @@ public class LearningActivity extends AppCompatActivity {
 
         if (learnedCount < MAX_LEARNING_COUNT) {
             learnedCount++;
+
             handler.postDelayed(() -> {
                 double currentCogLoad = PC_connector.cognitiveLoad;
+
+                addData(
+                        System.currentTimeMillis() + "",
+                        sharedPreferences.getString("driving_exp", "-1"),
+                        sharedPreferences.getString("english_skill", "-1")
+                        );
+
+
                 if (currentCogLoad > COG_RISK_THRESHOLD) {
                     // 인지 부하가 '매우 높음' 상태 => 학습 보류
                     userCognitiveStatus = STATUS_RISK;
@@ -348,8 +419,15 @@ public class LearningActivity extends AppCompatActivity {
                     Log.d("LearningActivity", "Driver status: High condition. Play low level sentence");
                     userCognitiveStatus = STATUS_HIGH;
                     targetSentence[0] = highCognitiveContent.get(highIdx);
+                    addData(
+                            targetSentence[0].getSentence(),
+                            targetSentence[0].getLearningLevel() + "",
+                            sharedPreferences.getString("topic", "unknown"),
+                            currentCogLoad + ""
+                    );
+                    addData("HIGH");
                     runOnUiThread(() -> {
-                        ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0].getSentence(), targetSentence[0].getLearningLevel())
+                        ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0])
                                 + "\n (인지 부하 높음 상태: " + currentCogLoad + ")"
                         );
                         highIdx++;
@@ -359,8 +437,15 @@ public class LearningActivity extends AppCompatActivity {
                     Log.d("LearningActivity", "Driver status: Mid condition. Play mid level sentence");
                     userCognitiveStatus = STATUS_MID;
                     targetSentence[0] = midCognitiveContent.get(midIdx);
+                    addData(
+                            targetSentence[0].getSentence(),
+                            targetSentence[0].getLearningLevel() + "",
+                            sharedPreferences.getString("topic", "unknown"),
+                            currentCogLoad + ""
+                    );
+                    addData("MID");
                     runOnUiThread(() -> {
-                        ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0].getSentence(), targetSentence[0].getLearningLevel())
+                        ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0])
                                 + "\n (인지 부하 중간 상태: " + currentCogLoad + ")"
                         );
                         midIdx++;
@@ -370,13 +455,40 @@ public class LearningActivity extends AppCompatActivity {
                     Log.d("LearningActivity", "Driver status: Low condition. Play high level sentence");
                     userCognitiveStatus = STATUS_LOW;
                     targetSentence[0] = lowCognitiveContent.get(lowIdx);
+                    addData(
+                            targetSentence[0].getSentence(),
+                            targetSentence[0].getLearningLevel() + "",
+                            sharedPreferences.getString("topic", "unknown"),
+                            currentCogLoad + ""
+                    );
+                    addData("LOW");
                     runOnUiThread(() -> {
-                        ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0].getSentence(), targetSentence[0].getLearningLevel())
+                        ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0])
                                 + "\n (인지 부하 낮음 상태: " + currentCogLoad + ")"
                         );
                         lowIdx++;
                     });
                 }
+
+                /**
+                 * Data add (문장 정보 | 인지부하 정보 )
+                 */
+                if(currentCogLoad > COG_RISK_THRESHOLD) {
+                    // 인지 부하가 RISK 상태일 때 데이터 저장으로, 영어 문장 재생하지 않고 넘어간다
+                    addData(
+                            "DRIVER'S COGNITIVE IS IN RISK... SCHEDULING NEXT SENTENCE",  // 재생 문장
+                            "-1",                                                         // 재생 문장 난이도
+                            sharedPreferences.getString("topic", "unknown"),       // 주제
+                            currentCogLoad + "",                                         // 인지 부하 값
+                            "RISK",                                                      // 인지 부하 레벨
+                            "SKIPPED",                                                   // 쉐도잉 인식 문장
+                            "SKIPPED",                                                   // 정답 여부
+                            "-1",                                                        // 알고리즘 계산 값
+                            currentCycle + ""                                            // 학습 사이클 차수
+                    );
+                    flushData();
+                }
+
             }, delay);
         } else {
             // 학습이 모두 종료된 상황 (영어 학습 단계 종료)
@@ -389,7 +501,6 @@ public class LearningActivity extends AppCompatActivity {
             scheduleNextSentence("새로운 학습을 진행하시겠습니까?" +
                     " 진행 또는 아니오로 대답 해 주세요");
         }
-
     }
 
     /**
@@ -422,51 +533,36 @@ public class LearningActivity extends AppCompatActivity {
     }
 
     /**
-     * 해당 메소드는 영어 학습 컨텐츠 문장을 사용자에게 제공하기 위해 사용
-     *
-     * @param _parsedContent         영어 학습 컨텐츠
-     * @param _contentUncompletedIdx 학습이 미 완료된 문장
-     * @return 재생된 문장
+     * 영어 학습 컨텐츠를 재생하는 경우 사용되는 메소드.
+     * @param _sentence 영어 학습 컨텐츠
+     * @return  재생된 영어 문장
      */
-    private String sentenceToSpeech(String[] _parsedContent, int _contentUncompletedIdx) {
-        String targetSentence = _parsedContent[_contentUncompletedIdx];
-
-        assert ttsModule != null;
-        Log.d("LearningActivity", targetSentence);
-        ttsModule.setLanguage(Locale.US);
-        ttsModule.speak(targetSentence);
-        return targetSentence;
-    }
-
-    /**
-     * 해당 메소드는 영어 학습 종료 후, 사용자의 음성 명령을 받기 위한 안내 문장을 재생하기 위해 사용
-     *
-     * @param _sentence 안내 메시지
-     * @return 재생된 문장
-     */
-    private String sentenceToSpeech(String _sentence, int _level) {
-        Log.d("LearningActivity", _sentence);
-
-        switch (_level) {
+    private String sentenceToSpeech(Sentence _sentence){
+        Log.d("LearningActivity", _sentence.getSentence());
+        switch (_sentence.getLearningLevel()) {
             case 0: // 문장 레벨 0, 즉 인지 부하가 높음 상태에서 재생되는 문장
-                ttsModule.setTextSpeechRate(0.70f);
+                Log.d("LearningActivity", "Sentence for high cog status... set speed reate to 0.75f");
+                ttsModule.setTextSpeechRate(0.75f);
                 break;
             case 1: // 문장 레벨 1, 즉 인지 부하가 중간 상태에서 재생되는 문장
+                Log.d("LearningActivity", "Sentence for mid level sentence... set speed reate to 0.80f");
                 ttsModule.setTextSpeechRate(0.80f);
                 break;
             case 2: // 문장 레밸 2, 즉 인지 부하가 낮음 상태에서 재생되는 문장
+                Log.d("LearningActivity", "sentence for low level sentence... set speed reate to 0.85f");
                 ttsModule.setTextSpeechRate(0.90f);
                 break;
             default:
         }
+
         ttsModule.setLanguage(Locale.US);
-        ttsModule.speak(_sentence);
-        return _sentence;
+        ttsModule.speak(_sentence.getSentence());
+        return _sentence.getSentence();
     }
 
     /**
-     * 문장을 재생하며, 한국어를 재생할 때 사용한다
-     * @param _sentence 재생할 문장 (한국어 )
+     * 사용자의 음성 명령을 받는 단계에서 사용, 한국어를 재생할 때 사용한다
+     * @param _sentence 재생할 문장 (한국어 , 안내 매세지)
      * @return 재생된 문장
      */
     private String sentenceToSpeech(String _sentence) {
@@ -485,7 +581,6 @@ public class LearningActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, GenerateActivity.class);
         //변경된 주제에 맞게 변경
-        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("topic", _newTopic);
         editor.apply();
         startActivity(intent);

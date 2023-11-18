@@ -18,6 +18,8 @@ import android.widget.TextView;
 
 import com.example.chatgpt_english.module.TTSModule;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -42,11 +44,12 @@ public class GenerateActivity extends AppCompatActivity {
     private TextView responseView;
     private OkHttpClient client;
     private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 
     private String drivingSkill;
     private String englishSkill;
     private String topic;
-
+    private int cycle;
     private JSONObject jsonResponse;
     private String[] parsedContent;
 
@@ -71,6 +74,8 @@ public class GenerateActivity extends AppCompatActivity {
         drivingSkill = sharedPreferences.getString("driving_exp", "1");
         englishSkill = sharedPreferences.getString("english_skill", "1");
         topic = sharedPreferences.getString("topic", "랜덤 주제");
+        cycle = increaseLearningCycle();
+
 
         Log.d("GenerateActivity", "driving skill= " + drivingSkill + "| english skill= " + englishSkill + "| topic= " + topic);
 
@@ -78,16 +83,22 @@ public class GenerateActivity extends AppCompatActivity {
         String input = "당신의 역할은 '영어 학습 컨텐츠 제공자'입니다. " +
                 "운전 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 숙련자와 같다고 하고, " +
                 "영어 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 영어 언어학자 수준하고 같다고 해." +
-                "이때 영어 문장 생성을 위해 조건 1, 조건 2, 조건 3에 따라 생성해. 조건은 다음과 같음. "+
-                "조건 1은 사용자의 운전 실력은" + drivingSkill + " 영어 실력은" + englishSkill + " 주제는 " + topic + "으로 설정할 때" +
-                "사용자의 운전 실력과 영어 실력에 따라 영어 학습 문장 난이도를 조절해야함. "+
-                "조건 2는 주제에 맞는 영어 학습을 하기 위한 영어 문장을 " +
-                "영어 단어의 개수가 3개인 문장 3개, 영어 단어의 개수가 4개인 문장 3개, 영어 단어의 개수가 5개인 문장 3개, 즉 총 9개 문장을 생성해야함. " +
-                "조건 3은 아래의 예시와 같이 학습을 위한 오직 영어 문장만 출력하고, 이 외 다른 응답은 출력하지말아야 함." +
-                "Again, you MUST only say the requested total number of 9 english sentences for learning and do not contain numbering" +
-                "출력 예시 다음과 같아. I am a boy";
+                "이때 사용자의 운전 실력은" + drivingSkill + " 영어 실력은" + englishSkill + " 주제는 " + topic + "으로 설정할 때+" +
+                "사용자의 영어 실력과 운전 실력에 따라 생성되는 영어 문장의 어휘 수준을 결정해주세요."+
+                "사용자가 설정한 주제에 맞춰 영어 문장을 생성해 주세요."+
+                "3단어의 문장, 5단어의 문장, 7단어의 문장을 각각 20문장 생성해 주세요." +
+                "출력시 JSON Object로 반환하며, key값으로는 '3단어', '5단어', '7단어'로 하여 반환해줘"+
+                "출력할때 학습을 위한 오직 영어 문장만 출력하고(JSON Object만), 이 외 다른 응답은 출력하지마.";
         postRequest(input);
 
+    }
+
+    private int increaseLearningCycle(){
+        editor = sharedPreferences.edit();
+        editor.putInt("Cycle", (sharedPreferences.getInt("Cycle", -2) + 1));
+        editor.apply();
+
+        return sharedPreferences.getInt("Cycle", -1);
     }
 
     private void goToLearningActivity() {
@@ -122,16 +133,27 @@ public class GenerateActivity extends AppCompatActivity {
                 .show();
     }
 
-    public String[] parseResponse(String response) {
-        String[] parsedResponse = response.split("\n");
+    public String[] parseResponse(String response) throws JSONException {
+        //난이도 파싱
+        //```json ~ ``` 중간 부분 추출
+        if(response.startsWith("```json")) {
+            response = response.substring(7, response.length() - 3);
+        }
+        //Json 재변환
+        jsonResponse = new JSONObject(response);
+        JSONArray parsedResponse5 = jsonResponse.getJSONArray("3단어");
+        JSONArray parsedResponse10 = jsonResponse.getJSONArray("5단어");
+        JSONArray parsedResponse15 = jsonResponse.getJSONArray("7단어");
+
         ArrayList<String> finalResponse = new ArrayList<>();
         //check parsing error
-        for (int i = 0; i < parsedResponse.length; i++) {
-            if (!parsedResponse[i].equals("")) {
-                finalResponse.add(parsedResponse[i]);
+        for (int i = 0; i < parsedResponse5.length(); i++) {
+            if (!parsedResponse5.getString(i).equals("")) {
+                finalResponse.add(parsedResponse5.getString(i));
+                finalResponse.add(parsedResponse10.getString(i));
+                finalResponse.add(parsedResponse15.getString(i));
             }
         }
-
         Collections.sort(finalResponse, new Comparator<String>() {
             @Override
             public int compare(String s1, String s2) {
@@ -140,7 +162,9 @@ public class GenerateActivity extends AppCompatActivity {
                 return Integer.compare(comp1, comp2);
             }
         });
-
+        for (int i =0; i< 15; i ++){
+            Log.d("parseResponse", finalResponse.get(i));
+        }
         return finalResponse.toArray(new String[0]);
     }
 
