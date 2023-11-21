@@ -20,13 +20,15 @@ import com.example.chatgpt_english.connect_PC.PC_connector;
 
 public class ProfileSettingsActivity extends AppCompatActivity {
     private Button settingBtn;
+    private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
-        resetLearningCycle();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        resetLearningCycleNCurrentEnglishSkill();
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.RECORD_AUDIO}, 0);
@@ -50,9 +52,10 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         });
     }
 
-    private void resetLearningCycle(){
-        editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        editor.putInt("Cycle", 0);
+    private void resetLearningCycleNCurrentEnglishSkill(){
+        editor = sharedPreferences.edit();
+        editor.putInt("cycle", 0);
+        editor.putString("current_english_skill", "-1");
         editor.apply();
     }
 
