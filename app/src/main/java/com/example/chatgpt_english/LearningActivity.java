@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.Random;
 
 public class LearningActivity extends AppCompatActivity {
-    private final int MAX_LEARNING_COUNT = 8;       // 현재 주제에 학습 가능한 문장 수
+    private final int MAX_LEARNING_COUNT = 5;       // 현재 주제에 학습 가능한 문장 수
     private final int COG_RISK_THRESHOLD = 100;     // 인지 부하 100 초과 경우 '매우 높음'
     private final int COG_HIGH_THRESHOLD = 75;      // 인지 부하 75 초과 경우 (75 <  <= 100) '높음'
     private final int COG_MID_THRESHOLD = 50;       // 인지 부하 50 초과 경우 (50 <  <= 75) '중간'
@@ -63,6 +63,8 @@ public class LearningActivity extends AppCompatActivity {
     // 사용자 인지 부하 정도를 파악하기 위한 변수
     int userCognitiveStatus = -1;   // 0: 낮음 | 1: 중간 | 2: 높음 | 3: 매우 높음
     int currentCycle = -1;
+    int correctCount = -1;
+    float userEnglishSkill = -1;
 
     StringBuilder dataSB;
 
@@ -77,7 +79,13 @@ public class LearningActivity extends AppCompatActivity {
         random = new Random();
         Log.d("LearningActivity", "onCreate called on LearningActivity");
         progressStatus = 0;
-        currentCycle = sharedPreferences.getInt("Cycle", -1);
+        currentCycle = sharedPreferences.getInt("cycle", -1);
+        correctCount = 0;
+
+        if((userEnglishSkill = Float.parseFloat(sharedPreferences.getString("current_english_skill", "-1"))) < 0f){
+            userEnglishSkill = Float.parseFloat(sharedPreferences.getString("english_skill", "1"));
+        }
+
 
         // UI element
         ttsSentenceTextView = findViewById(R.id.testView);
@@ -108,11 +116,13 @@ public class LearningActivity extends AppCompatActivity {
                                 || result.equalsIgnoreCase("yeah") || result.equals("에스")
                                 || result.equals("예") || result.equals("에") || result.equals("응")
                                 || result.equals("네") || result.equals("계속") || result.equals("cancel")
-                                || result.equals("진행") || result.equalsIgnoreCase("chain hang");
+                                || result.equals("진행") || result.equalsIgnoreCase("chain hang")
+                                || result.equals("해") || result.equals("해줘") || result.equals("하라고") || result.equals("해주세요")
+                                || result.equals("진행할께") || result.equals("진행할게") || result.equals("그래");
 
                         boolean isNo = result.equalsIgnoreCase("no") || result.equals("노")
-                                || result.equals("아니") || result.equals("아니오") || result.equals("아니요")
-                                || result.equals("그만")
+                                || result.equals("아니") || result.equals("아니오") || result.equals("아니요") || result.equals("안해")
+                                || result.equals("그만") || result.equals("싫어")
                                 || result.equals("중지") || result.equals("충치") || result.equalsIgnoreCase("twenty")
                                 || result.equals("20") || result.equalsIgnoreCase("jonsey")
                                 || result.equalsIgnoreCase("johnsey")
@@ -126,6 +136,7 @@ public class LearningActivity extends AppCompatActivity {
                                 if (isYes) {
                                     Log.d("LearningActivity", "새로운 영어 학습 진행");
                                     progressStatus = 2;
+                                    correctCount = changeEnglishSkill(correctCount);
                                     scheduleNextSentence("새로운 주제로 영어 학습을 진행하시겠습니까? 진행 또는 아니오로 대답 해 주세요.");
                                 } else if (isNo) {
                                     Log.d("LearningActivity", "영어 학습 종료");
@@ -202,6 +213,7 @@ public class LearningActivity extends AppCompatActivity {
 
                     if (lDist < 11) {
                         answerResult += "\nCORRECT";
+                        correctCount += 1;
                         addData("CORRECT");
                     } else {
                         answerResult += "\nWrong";
@@ -278,6 +290,21 @@ public class LearningActivity extends AppCompatActivity {
         }).start();
     }
 
+    private int changeEnglishSkill(int _correctCount){
+        if(_correctCount > 2){
+            this.userEnglishSkill += 0.5f;
+        }else {
+            this.userEnglishSkill -= 0.5f;
+            if(this.userEnglishSkill < 1){
+                this.userEnglishSkill = 1f;
+            }
+        }
+        editor.putString("current_english_skill", userEnglishSkill + "");
+        editor.apply();
+
+        return 0;
+    }
+
     private void addData(String... _data){
         if(dataSB != null){
             for (String s: _data){
@@ -333,11 +360,11 @@ public class LearningActivity extends AppCompatActivity {
          for (int idx = 0; idx < _parsedContent.length; idx++) {
              int wordCount = _parsedContent[idx].split(" ").length;
 
-             if(wordCount <= HIGH_COG_WORD_COUNT){
+             if(wordCount <= HIGH_COG_WORD_COUNT){ // 3단어 문장이 들어감
                  learningContent.add(new Sentence(_parsedContent[idx], 0));
-             } else if (wordCount <= MID_COG_WORD_COUNT){
+             } else if (wordCount <= MID_COG_WORD_COUNT){ // 4 ~ 5 단어 문장이 들어감
                  learningContent.add(new Sentence(_parsedContent[idx], 1));
-             } else {
+             } else {   // 6단어 이상의 문장 들이 들어감
                  learningContent.add(new Sentence(_parsedContent[idx], 2));
              }
          }
@@ -368,7 +395,7 @@ public class LearningActivity extends AppCompatActivity {
      * 해당 메소드는 영어 학습 컨텐츠를 재생 할 때 ( progressStatus = 0 ) 사용 된다
      */
     private void scheduleNextSentence() {
-        int delay = random.nextInt(5000) + 3000;
+        int delay = 5000;
         final Sentence[] targetSentence = new Sentence[1];
 
         if (learnedCount < MAX_LEARNING_COUNT) {
@@ -384,6 +411,7 @@ public class LearningActivity extends AppCompatActivity {
                         System.currentTimeMillis() + "",
                         sharedPreferences.getString("driving_exp", "-1"),
                         sharedPreferences.getString("english_skill", "-1"),
+                        userEnglishSkill + "",
                         targetSentence[0].getSentence(),
                         targetSentence[0].getLearningLevel() + "",
                         sharedPreferences.getString("topic", "unknown"),

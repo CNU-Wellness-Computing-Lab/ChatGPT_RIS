@@ -46,9 +46,10 @@ public class GenerateActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
-    private String drivingSkill;
-    private String englishSkill;
+    private int drivingSkill;
+    private float englishSkill;
     private String topic;
+    private String input;
     private int cycle;
 
     private JSONObject jsonResponse;
@@ -74,32 +75,29 @@ public class GenerateActivity extends AppCompatActivity {
                 .build();
 
 
-        drivingSkill = sharedPreferences.getString("driving_exp", "1");
-        englishSkill = sharedPreferences.getString("english_skill", "1");
+        drivingSkill = Integer.parseInt(sharedPreferences.getString("driving_exp", "1"));
+        englishSkill = decideUserEnglishSkill();
         topic = sharedPreferences.getString("topic", "랜덤 주제");
         cycle = increaseLearningCycle();
 
-        Log.d("GenerateActivity", "driving skill= " + drivingSkill + "| english skill= " + englishSkill + "| topic= " + topic + "| cycle= " + cycle );
+        Log.d("GenerateActivity", "driving skill= " + drivingSkill + "| english skill= " + englishSkill + "| topic= " + topic + "| cycle= " + cycle);
 
         // GPT api response test
-        String input = "당신의 역할은 '영어 학습 컨텐츠 제공자'입니다. " +
-                "운전 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 숙련자와 같다고 하고, " +
-                "영어 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 영어 언어학자 수준하고 같다고 해." +
-                "이때 사용자의 운전 실력은" + drivingSkill + " 영어 실력은" + englishSkill + " 주제는 " + topic + "으로 설정할 때+" +
-                "사용자의 영어 실력과 운전 실력에 따라 생성되는 영어 문장의 어휘 수준을 결정해주세요."+
-                "사용자가 설정한 주제에 맞춰 영어 문장을 생성해 주세요." +
-                "3단어의 문장, 5단어의 문장, 7단어의 문장을 각각 20문장 생성해 주세요." +
-                "출력시 JSON Object로 반환하며, key값으로는 '3단어', '5단어', '7단어'로 하여 반환해줘"+
-                "출력할때 학습을 위한 오직 영어 문장만 출력하고(JSON Object만), 이 외 다른 응답은 출력하지마.";
+        input = "당신의 역할은 '영어 학습 컨텐츠 제공자'입니다. " +
+                "사용자의 영어 실력을 1 ~ 10이라고 할 때, 1은 초보자, 10은 원어민 수준입니다. " +
+                "사용자의 영어 실력은 '" + englishSkill + "', 영어 문장 주제는 '" + topic + "' 입니다." +
+                "이에 부합하는 영어 문장을 생성해 주세요. 생성하는 영어 문장은 2단어, 3단어, 4단어, 5단어, 6단어, 7단어, 8단어로 구성된 문장이며 각각 5문장을 생성해주세요." +
+                "출력시 JSON Object로 반환하며, key값으로는 '2단어', '3단어', '4단어', '5단어', '6단어', '7단어', '8단어' 로 하여 반환해주세요. " +
+                "출력할때 학습을 위한 오직 영어 문장만 출력하고(JSON Object만), 이 외 다른 응답은 출력하지마세요";
         postRequest(input);
     }
 
-    private int increaseLearningCycle(){
+    private int increaseLearningCycle() {
         editor = sharedPreferences.edit();
-        editor.putInt("Cycle", (sharedPreferences.getInt("Cycle", -2) + 1));
+        editor.putInt("cycle", (sharedPreferences.getInt("cycle", -2) + 1));
         editor.apply();
 
-        return sharedPreferences.getInt("Cycle", -1);
+        return sharedPreferences.getInt("cycle", -1);
     }
 
     private void goToLearningActivity() {
@@ -108,7 +106,18 @@ public class GenerateActivity extends AppCompatActivity {
 
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+    }
 
+    private float decideUserEnglishSkill(){
+        int profileEnglishSkill = Integer.parseInt(sharedPreferences.getString("english_skill", "1"));
+        float currentEnglishSkill = Float.parseFloat(sharedPreferences.getString("current_english_skill", "-1"));
+
+        if(currentEnglishSkill < 0f){
+            // 첫 학습 단계로
+            return profileEnglishSkill;
+        }
+
+        return currentEnglishSkill;
     }
 
     @Override
@@ -139,22 +148,44 @@ public class GenerateActivity extends AppCompatActivity {
         //난이도 파싱
         //```json ~ ``` 중간 부분 추출
         //```json ~ ``` 중간 부분 추출
-        if(response.startsWith("```json")) {
+        if (response.startsWith("```json")) {
             response = response.substring(7, response.length() - 3);
         }
         //Json 재변환
         jsonResponse = new JSONObject(response);
-        JSONArray parsedResponse5 = jsonResponse.getJSONArray("3단어");
-        JSONArray parsedResponse10 = jsonResponse.getJSONArray("5단어");
-        JSONArray parsedResponse15 = jsonResponse.getJSONArray("7단어");
+        JSONArray parsedResponse2 = jsonResponse.getJSONArray("2단어");
+        JSONArray parsedResponse3 = jsonResponse.getJSONArray("3단어");
+        JSONArray parsedResponse4 = jsonResponse.getJSONArray("4단어");
+        JSONArray parsedResponse5 = jsonResponse.getJSONArray("5단어");
+        JSONArray parsedResponse6 = jsonResponse.getJSONArray("6단어");
+        JSONArray parsedResponse7 = jsonResponse.getJSONArray("7단어");
+        JSONArray parsedResponse8 = jsonResponse.getJSONArray("8단어");
 
         ArrayList<String> finalResponse = new ArrayList<>();
+
+        final int MAX_LEN = 5;
         //check parsing error
-        for (int i = 0; i < parsedResponse5.length(); i++) {
-            if (!parsedResponse5.getString(i).equals("")) {
+        for (int i = 0; i < MAX_LEN; i++) {
+            if (i < parsedResponse2.length() ){
+                finalResponse.add(parsedResponse2.getString(i));
+            }
+            if (i < parsedResponse3.length() ){
+                finalResponse.add(parsedResponse3.getString(i));
+            }
+            if (i < parsedResponse4.length() ){
+                finalResponse.add(parsedResponse4.getString(i));
+            }
+            if (i < parsedResponse5.length() ){
                 finalResponse.add(parsedResponse5.getString(i));
-                finalResponse.add(parsedResponse10.getString(i));
-                finalResponse.add(parsedResponse15.getString(i));
+            }
+            if (i < parsedResponse6.length() ){
+                finalResponse.add(parsedResponse6.getString(i));
+            }
+            if (i < parsedResponse7.length() ){
+                finalResponse.add(parsedResponse7.getString(i));
+            }
+            if (i < parsedResponse8.length()){
+                finalResponse.add(parsedResponse8.getString(i));
             }
         }
         Collections.sort(finalResponse, new Comparator<String>() {
@@ -165,7 +196,8 @@ public class GenerateActivity extends AppCompatActivity {
                 return Integer.compare(comp1, comp2);
             }
         });
-        for (int i =0; i< 15; i ++){
+
+        for (int i = 0; i < finalResponse.size(); i++) {
             Log.d("parseResponse", finalResponse.get(i));
         }
         return finalResponse.toArray(new String[0]);
@@ -226,11 +258,14 @@ public class GenerateActivity extends AppCompatActivity {
                             ttsModule.setLanguage(Locale.KOREA);
                             ttsModule.speak("잠시후 영어 학습을 시작하도록 하겠습니다. 딩동 소리 이후에 들으신 문장을 따라 해 주세요");
 
-                            handler.postDelayed(() -> {goToLearningActivity();}, 10000);
+                            handler.postDelayed(() -> {
+                                goToLearningActivity();
+                            }, 10000);
 
 
                         } catch (Exception e) {
-                            responseView.setText("Failed to parse the response");
+                            responseView.setText("Failed to parse the response, requesting again...");
+                            postRequest(input);
                             e.printStackTrace();
                         }
                     });

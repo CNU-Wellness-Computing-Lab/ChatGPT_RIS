@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Button;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -26,7 +25,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        resetLearningCycle();
+        resetLearningCycleNCurrentEnglishSkill();
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.RECORD_AUDIO}, 0);
@@ -50,9 +49,10 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         });
     }
 
-    private void resetLearningCycle(){
+    private void resetLearningCycleNCurrentEnglishSkill(){
         editor = sharedPreferences.edit();
-        editor.putInt("Cycle", 0);
+        editor.putInt("cycle", 0);
+        editor.putString("current_english_skill", "-1");
         editor.apply();
     }
 
