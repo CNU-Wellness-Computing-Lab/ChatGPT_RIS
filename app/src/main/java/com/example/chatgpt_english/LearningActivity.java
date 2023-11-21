@@ -285,7 +285,7 @@ public class LearningActivity extends AppCompatActivity {
                                 /*
                                      TEST CODE STARTS
                                  */
-                                PC_connector.cognitiveLoad = random.nextInt(130);
+//                                PC_connector.cognitiveLoad = random.nextInt(130);
                                 /*
                                      TEST CODE ENDS
                                  */

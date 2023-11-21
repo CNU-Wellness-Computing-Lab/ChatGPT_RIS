@@ -45,6 +45,7 @@ public class ProfileSettingsActivity extends AppCompatActivity {
         settingBtn = findViewById(R.id.settingButton);
         settingBtn.setOnClickListener((v)->{
             Intent intent = new Intent(this, GenerateActivity.class);
+//            PC_connector.connect();
             startActivity(intent);
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
