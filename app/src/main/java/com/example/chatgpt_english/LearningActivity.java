@@ -20,6 +20,7 @@ import com.example.chatgpt_english.module.STTModule;
 import com.example.chatgpt_english.module.TTSModule;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Random;
 
@@ -70,6 +71,8 @@ public class LearningActivity extends AppCompatActivity {
     // 사용자 인지 부하 정도를 파악하기 위한 변수
     int userCognitiveStatus = -1;   // 0: 낮음 | 1: 중간 | 2: 높음 | 3: 매우 높음
     int currentCycle = -1;
+    int correctCount = -1;
+    float userEnglishSkill = -1;
     StringBuilder dataSB;
 
     @Override
@@ -83,6 +86,12 @@ public class LearningActivity extends AppCompatActivity {
         random = new Random();
         progressStatus = 0;
         currentCycle = sharedPreferences.getInt("Cycle", -1);
+        correctCount = 0;
+
+        if((userEnglishSkill = Float.parseFloat(sharedPreferences.getString("current_english_skill", "-1"))) < 0f){
+            userEnglishSkill = Float.parseFloat(sharedPreferences.getString("english_skill", "1"));
+        }
+
 
         // UI element
         ttsSentenceTextView = findViewById(R.id.testView);
@@ -117,10 +126,13 @@ public class LearningActivity extends AppCompatActivity {
                                 || result.equalsIgnoreCase("yeah") || result.equals("에스")
                                 || result.equals("예") || result.equals("에") || result.equals("응")
                                 || result.equals("네") || result.equals("계속") || result.equals("cancel")
-                                || result.equals("진행") || result.equalsIgnoreCase("chain hang");
+                                || result.equals("진행") || result.equalsIgnoreCase("chain hang")
+                                || result.equals("해") || result.equals("해줘") || result.equals("하라고") || result.equals("해주세요")
+                                || result.equals("진행할께") || result.equals("진행할게") || result.equals("그래");
 
                         boolean isNo = result.equalsIgnoreCase("no") || result.equals("노")
-                                || result.equals("아니") || result.equals("아니오") || result.equals("아니요")
+                                || result.equals("아니") || result.equals("아니오") || result.equals("아니요") || result.equals("안해")
+                                || result.equals("그만") || result.equals("싫어")
                                 || result.equals("중지") || result.equals("충치") || result.equalsIgnoreCase("twenty")
                                 || result.equals("20") || result.equalsIgnoreCase("jonsey")
                                 || result.equalsIgnoreCase("johnsey")
@@ -134,6 +146,7 @@ public class LearningActivity extends AppCompatActivity {
                                 if (isYes) {
                                     Log.d("LearningActivity", "새로운 영어 학습 진행");
                                     progressStatus = 2;
+                                    correctCount = changeEnglishSkill(correctCount);
                                     scheduleNextSentence("새로운 주제로 영어 학습을 진행하시겠습니까? 진행 또는 아니오로 대답 해 주세요.");
                                 } else if (isNo) {
                                     Log.d("LearningActivity", "영어 학습 종료");
@@ -221,6 +234,7 @@ public class LearningActivity extends AppCompatActivity {
 
                     if (lDist < 11) {
                         answerResult += "\nCORRECT";
+                        correctCount += 1;
                         addData("CORRECT");
                     } else {
                         answerResult += "\nWrong";
@@ -300,6 +314,22 @@ public class LearningActivity extends AppCompatActivity {
         }).start();
     }
 
+    private int changeEnglishSkill(int _correctCount){
+        if(_correctCount > 2){
+            this.userEnglishSkill += 0.5f;
+        }else {
+            this.userEnglishSkill -= 0.5f;
+            if(this.userEnglishSkill < 1){
+                this.userEnglishSkill = 1f;
+            }
+        }
+        editor.putString("current_english_skill", userEnglishSkill + "");
+        editor.apply();
+
+        return 0;
+    }
+
+
     private void addData(String... _data){
         if(dataSB != null){
             for (String s: _data){
@@ -363,6 +393,10 @@ public class LearningActivity extends AppCompatActivity {
                 lowCognitiveContent.add(new Sentence(_parsedContent[idx],2));
             }
         }
+
+        Collections.shuffle(highCognitiveContent);
+        Collections.shuffle(midCognitiveContent);
+        Collections.shuffle(lowCognitiveContent);
     }
 
 
@@ -400,7 +434,8 @@ public class LearningActivity extends AppCompatActivity {
                 addData(
                         System.currentTimeMillis() + "",
                         sharedPreferences.getString("driving_exp", "-1"),
-                        sharedPreferences.getString("english_skill", "-1")
+                        sharedPreferences.getString("english_skill", "-1"),
+                        userEnglishSkill + ""
                         );
 
 
