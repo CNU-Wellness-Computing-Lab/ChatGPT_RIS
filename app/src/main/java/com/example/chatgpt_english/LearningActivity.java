@@ -574,22 +574,7 @@ public class LearningActivity extends AppCompatActivity {
      */
     private String sentenceToSpeech(Sentence _sentence){
         Log.d("LearningActivity", _sentence.getSentence());
-        switch (_sentence.getLearningLevel()) {
-            case 0: // 문장 레벨 0, 즉 인지 부하가 높음 상태에서 재생되는 문장
-                Log.d("LearningActivity", "Sentence for high cog status... set speed reate to 0.75f");
-                ttsModule.setTextSpeechRate(0.75f);
-                break;
-            case 1: // 문장 레벨 1, 즉 인지 부하가 중간 상태에서 재생되는 문장
-                Log.d("LearningActivity", "Sentence for mid level sentence... set speed reate to 0.80f");
-                ttsModule.setTextSpeechRate(0.80f);
-                break;
-            case 2: // 문장 레밸 2, 즉 인지 부하가 낮음 상태에서 재생되는 문장
-                Log.d("LearningActivity", "sentence for low level sentence... set speed reate to 0.85f");
-                ttsModule.setTextSpeechRate(0.85f);
-                break;
-            default:
-        }
-
+        ttsModule.setTextSpeechRate(0.85f);
         ttsModule.setLanguage(Locale.US);
         ttsModule.speak(_sentence.getSentence());
         return _sentence.getSentence();
