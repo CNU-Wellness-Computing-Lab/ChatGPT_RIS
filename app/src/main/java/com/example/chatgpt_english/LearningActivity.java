@@ -81,6 +81,7 @@ public class LearningActivity extends AppCompatActivity {
         progressStatus = 0;
         currentCycle = sharedPreferences.getInt("cycle", -1);
         correctCount = 0;
+        PC_connector.driverSkill = Integer.parseInt(sharedPreferences.getString("driving_exp", "1"));
 
         if((userEnglishSkill = Float.parseFloat(sharedPreferences.getString("current_english_skill", "-1"))) < 0f){
             userEnglishSkill = Float.parseFloat(sharedPreferences.getString("english_skill", "1"));
@@ -275,7 +276,14 @@ public class LearningActivity extends AppCompatActivity {
                                 /*
                                      TEST CODE STARTS
                                  */
-                                PC_connector.cognitiveLoad = random.nextInt(130);
+//                                PC_connector.cognitiveLoad = ((-1f * 32f/900f) *
+//                                        (float) Integer.parseInt(sharedPreferences.getString("driver_exp", "1"))
+//                                                + (122f/900f))
+//                                        * (float) random.nextInt(130);
+//
+//                                PC_connector.cognitiveLoad = (((-1f * 32f/900f) * PC_connector.driverSkill + 122f/90f)
+//                                        * (float)random.nextInt(130));
+//                                PC_connector.cognitiveLoad = Math.round(PC_connector.cognitiveLoad * 1000) / 1000.0;
                                 /*
                                      TEST CODE ENDS
                                  */
