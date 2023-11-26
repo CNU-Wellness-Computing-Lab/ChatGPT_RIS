@@ -87,6 +87,7 @@ public class LearningActivity extends AppCompatActivity {
         progressStatus = 0;
         currentCycle = sharedPreferences.getInt("Cycle", -1);
         correctCount = 0;
+        PC_connector.driverSkill = Integer.parseInt(sharedPreferences.getString("driving_exp", "1"));
 
         if((userEnglishSkill = Float.parseFloat(sharedPreferences.getString("current_english_skill", "-1"))) < 0f){
             userEnglishSkill = Float.parseFloat(sharedPreferences.getString("english_skill", "1"));
@@ -291,8 +292,8 @@ public class LearningActivity extends AppCompatActivity {
             public void run() {
                 while (!Thread.interrupted()) {
                     try {
-//                        Thread.sleep(50);
-                        Thread.sleep(1000);
+                        Thread.sleep(50);
+//                        Thread.sleep(1000);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -303,7 +304,7 @@ public class LearningActivity extends AppCompatActivity {
                                 /*
                                      TEST CODE ENDS
                                  */
-                                cognitiveLoadTextView.setText(PC_connector.cognitiveLoad + "");
+//                                cognitiveLoadTextView.setText(PC_connector.cognitiveLoad + "");
                             }
                         });
                     } catch (InterruptedException e) {
