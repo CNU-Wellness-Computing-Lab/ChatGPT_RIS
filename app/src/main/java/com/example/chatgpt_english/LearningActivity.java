@@ -268,8 +268,8 @@ public class LearningActivity extends AppCompatActivity {
             public void run() {
                 while (!Thread.interrupted()) {
                     try {
-//                        Thread.sleep(50);
-                        Thread.sleep(1000);
+                        Thread.sleep(50);
+//                        Thread.sleep(1000);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
