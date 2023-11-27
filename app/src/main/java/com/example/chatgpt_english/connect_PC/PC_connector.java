@@ -17,6 +17,7 @@ public class PC_connector {
     private static String newip = "192.168.0.44";
     private static int port = 12345;
     public static double cognitiveLoad =0;
+    public static double adjustedCognitiveLoad = 0;
     public static int driverSkill = 1;
     public static void connect(){
         mHandler = new Handler();
@@ -56,8 +57,8 @@ public class PC_connector {
                             line2 = (int) dis.readUnsignedShort();
                             if(line2 > 0) {
                                 cognitiveLoad = (double)line2;
-                                cognitiveLoad = (((-1f * 32f/900f) * (float)driverSkill) + 122f/90f) * cognitiveLoad;
-                                cognitiveLoad = Math.round(cognitiveLoad * 1000) / 1000.0f;
+                                adjustedCognitiveLoad= (((-1f * 32f/900f) * (float)driverSkill) + 122f/90f) * cognitiveLoad;
+                                adjustedCognitiveLoad = Math.round(adjustedCognitiveLoad * 1000) / 1000.0f;
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {

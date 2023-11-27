@@ -25,6 +25,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        /**
+         * PC 통신을 위한 코드
+         */
+        PC_connector.connect();
         goToProfileSetting();
     }
 
