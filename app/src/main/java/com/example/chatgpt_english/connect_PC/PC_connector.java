@@ -16,11 +16,13 @@ public class PC_connector {
     private static Socket socket;
     private static String newip = "192.168.0.44";
     private static int port = 12345;
-    public static double cognitiveLoad =0;
+    public static double cognitiveLoad = 0;
+    public static double adjustedCognitiveLoad = 0;
     public static int driverSkill = 1;
-    public static void connect(){
+
+    public static void connect() {
         mHandler = new Handler();
-        Log.w("connect","연결 하는중");
+        Log.w("connect", "연결 하는중");
         // 받아오는거
         Thread checkUpdate = new Thread() {
             public void run() {
@@ -34,7 +36,7 @@ public class PC_connector {
                     Log.w("서버", "서버접속못함");
                     e1.printStackTrace();
                 }
-                Log.w("서버","안드로이드에서 서버로 연결요청");
+                Log.w("서버", "안드로이드에서 서버로 연결요청");
                 // Buffered가 잘못된듯.
                 try {
                     dos = new DataOutputStream(socket.getOutputStream());   // output에 보낼꺼 넣음
@@ -45,19 +47,19 @@ public class PC_connector {
                     e.printStackTrace();
                     Log.w("서버", "버퍼생성 잘못됨");
                 }
-                Log.w("서버","버퍼생성 잘됨");
+                Log.w("서버", "버퍼생성 잘됨");
 
-                while(true) {
+                while (true) {
                     // 서버에서 받아옴
                     try {
                         String line = "";
                         int line2;
                         while (true) {
                             line2 = (int) dis.readUnsignedShort();
-                            if(line2 > 0) {
-                                cognitiveLoad = (double)line2;
-                                cognitiveLoad = (((-1f * 32f/900f) * (float)driverSkill) + 122f/90f) * cognitiveLoad;
-                                cognitiveLoad = Math.round(cognitiveLoad * 1000) / 1000.0f;
+                            if (line2 > 0) {
+                                cognitiveLoad = (double) line2;
+                                adjustedCognitiveLoad = (((-1f * 32f / 900f) * (float) driverSkill) + 122f / 90f) * cognitiveLoad;
+                                adjustedCognitiveLoad = Math.round(adjustedCognitiveLoad * 1000) / 1000.0f;
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -65,7 +67,7 @@ public class PC_connector {
                                 });
                                 dos.flush();
                             }
-                            if(line2 == 999) {
+                            if (line2 == 999) {
                                 Log.w("서버", "소캣 종료, 받아온 값 :  " + line2);
                                 socket.close();
                                 break;

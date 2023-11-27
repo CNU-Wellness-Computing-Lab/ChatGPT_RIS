@@ -74,6 +74,7 @@ public class LearningActivity extends AppCompatActivity {
     int correctCount = -1;
     float userEnglishSkill = -1;
     StringBuilder dataSB;
+    String name = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +89,7 @@ public class LearningActivity extends AppCompatActivity {
         currentCycle = sharedPreferences.getInt("Cycle", -1);
         correctCount = 0;
         PC_connector.driverSkill = Integer.parseInt(sharedPreferences.getString("driving_exp", "1"));
+        name = sharedPreferences.getString("signature", "홍길동");
 
         if((userEnglishSkill = Float.parseFloat(sharedPreferences.getString("current_english_skill", "-1"))) < 0f){
             userEnglishSkill = Float.parseFloat(sharedPreferences.getString("english_skill", "1"));
@@ -304,7 +306,7 @@ public class LearningActivity extends AppCompatActivity {
                                 /*
                                      TEST CODE ENDS
                                  */
-//                                cognitiveLoadTextView.setText(PC_connector.cognitiveLoad + "");
+                                cognitiveLoadTextView.setText(PC_connector.adjustedCognitiveLoad + "");
                             }
                         });
                     } catch (InterruptedException e) {
@@ -344,7 +346,7 @@ public class LearningActivity extends AppCompatActivity {
     private void flushData(){
         if(dataSB != null) {
             if(dataSB.toString().split(",  ").length > 8){
-                CSVModule.writeCsvFile(getApplicationContext(), "English_Learning_withCog.csv", dataSB.toString());
+                CSVModule.writeCsvFile(getApplicationContext(), "English_Learning_withCogWithoutSpeed.csv", dataSB.toString());
             }else {
                 Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
                         + "deleting current data...");
@@ -423,7 +425,7 @@ public class LearningActivity extends AppCompatActivity {
      * 해당 메소드는 영어 학습 컨텐츠를 재생 할 때 ( progressStatus = 0 ) 사용 된다
      */
     private void scheduleNextSentence() {
-        int delay = random.nextInt(5000) + 3000;
+        int delay = 5000;
         final Sentence[] targetSentence = new Sentence[1];
 
         if (learnedCount < MAX_LEARNING_COUNT) {
@@ -431,26 +433,28 @@ public class LearningActivity extends AppCompatActivity {
 
             handler.postDelayed(() -> {
                 double currentCogLoad = PC_connector.cognitiveLoad;
+                double currentAdjustedCogLoad = PC_connector.adjustedCognitiveLoad;
 
                 addData(
                         System.currentTimeMillis() + "",
+                        name,
                         sharedPreferences.getString("driving_exp", "-1"),
                         sharedPreferences.getString("english_skill", "-1"),
                         userEnglishSkill + ""
                         );
 
 
-                if (currentCogLoad > COG_RISK_THRESHOLD) {
+                if (currentAdjustedCogLoad > COG_RISK_THRESHOLD) {
                     // 인지 부하가 '매우 높음' 상태 => 학습 보류
                     userCognitiveStatus = STATUS_RISK;
                     Log.d("LearningActivity", "Driver status: Risky condition. Halt the content");
                     runOnUiThread(() -> {
                         ttsSentenceTextView.setText(
-                                "(인지 부하 매우 높음 상태: " + currentCogLoad + ")");
+                                "(인지 부하 매우 높음 상태: " + currentAdjustedCogLoad + ")");
                     });
                     learnedCount--;
                     scheduleNextSentence();
-                } else if (currentCogLoad > COG_HIGH_THRESHOLD) {
+                } else if (currentAdjustedCogLoad > COG_HIGH_THRESHOLD) {
                     // 인지 부하가 '높음' 상태 => 낮은 레벨 문장 학습
                     Log.d("LearningActivity", "Driver status: High condition. Play low level sentence");
                     userCognitiveStatus = STATUS_HIGH;
@@ -459,16 +463,17 @@ public class LearningActivity extends AppCompatActivity {
                             targetSentence[0].getSentence(),
                             targetSentence[0].getLearningLevel() + "",
                             sharedPreferences.getString("topic", "unknown"),
-                            currentCogLoad + ""
+                            currentCogLoad + "",
+                            currentAdjustedCogLoad + ""
                     );
                     addData("HIGH");
                     runOnUiThread(() -> {
                         ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0])
-                                + "\n (인지 부하 높음 상태: " + currentCogLoad + ")"
+                                + "\n (인지 부하 높음 상태: " + currentAdjustedCogLoad + ")"
                         );
                         highIdx++;
                     });
-                } else if (currentCogLoad > COG_MID_THRESHOLD) {
+                } else if (currentAdjustedCogLoad > COG_MID_THRESHOLD) {
                     // 인지 부하가 '중간' 상태 => 중간 레벨 문장 학습
                     Log.d("LearningActivity", "Driver status: Mid condition. Play mid level sentence");
                     userCognitiveStatus = STATUS_MID;
@@ -477,12 +482,13 @@ public class LearningActivity extends AppCompatActivity {
                             targetSentence[0].getSentence(),
                             targetSentence[0].getLearningLevel() + "",
                             sharedPreferences.getString("topic", "unknown"),
-                            currentCogLoad + ""
+                            currentCogLoad + "",
+                            currentAdjustedCogLoad + ""
                     );
                     addData("MID");
                     runOnUiThread(() -> {
                         ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0])
-                                + "\n (인지 부하 중간 상태: " + currentCogLoad + ")"
+                                + "\n (인지 부하 중간 상태: " + currentAdjustedCogLoad + ")"
                         );
                         midIdx++;
                     });
@@ -495,12 +501,13 @@ public class LearningActivity extends AppCompatActivity {
                             targetSentence[0].getSentence(),
                             targetSentence[0].getLearningLevel() + "",
                             sharedPreferences.getString("topic", "unknown"),
-                            currentCogLoad + ""
+                            currentCogLoad + "",
+                            currentAdjustedCogLoad + ""
                     );
                     addData("LOW");
                     runOnUiThread(() -> {
                         ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0])
-                                + "\n (인지 부하 낮음 상태: " + currentCogLoad + ")"
+                                + "\n (인지 부하 낮음 상태: " + currentAdjustedCogLoad + ")"
                         );
                         lowIdx++;
                     });
@@ -509,13 +516,14 @@ public class LearningActivity extends AppCompatActivity {
                 /**
                  * Data add (문장 정보 | 인지부하 정보 )
                  */
-                if(currentCogLoad > COG_RISK_THRESHOLD) {
+                if(currentAdjustedCogLoad > COG_RISK_THRESHOLD) {
                     // 인지 부하가 RISK 상태일 때 데이터 저장으로, 영어 문장 재생하지 않고 넘어간다
                     addData(
                             "DRIVER'S COGNITIVE IS IN RISK... SCHEDULING NEXT SENTENCE",  // 재생 문장
                             "-1",                                                         // 재생 문장 난이도
                             sharedPreferences.getString("topic", "unknown"),       // 주제
                             currentCogLoad + "",                                         // 인지 부하 값
+                            currentAdjustedCogLoad + "",                                 // 조정된 인지부하 값
                             "RISK",                                                      // 인지 부하 레벨
                             "SKIPPED",                                                   // 쉐도잉 인식 문장
                             "SKIPPED",                                                   // 정답 여부
