@@ -65,7 +65,7 @@ public class LearningActivity extends AppCompatActivity {
     int currentCycle = -1;
     int correctCount = -1;
     float userEnglishSkill = -1;
-
+    String name = "";
     StringBuilder dataSB;
 
     @Override
@@ -82,6 +82,7 @@ public class LearningActivity extends AppCompatActivity {
         currentCycle = sharedPreferences.getInt("cycle", -1);
         correctCount = 0;
         PC_connector.driverSkill = Integer.parseInt(sharedPreferences.getString("driving_exp", "1"));
+        name = sharedPreferences.getString("signature", "홍길동");
 
         if((userEnglishSkill = Float.parseFloat(sharedPreferences.getString("current_english_skill", "-1"))) < 0f){
             userEnglishSkill = Float.parseFloat(sharedPreferences.getString("english_skill", "1"));
@@ -276,18 +277,15 @@ public class LearningActivity extends AppCompatActivity {
                                 /*
                                      TEST CODE STARTS
                                  */
-//                                PC_connector.cognitiveLoad = ((-1f * 32f/900f) *
-//                                        (float) Integer.parseInt(sharedPreferences.getString("driver_exp", "1"))
-//                                                + (122f/900f))
-//                                        * (float) random.nextInt(130);
+//                                PC_connector.cognitiveLoad = random.nextInt(130);
 //
-//                                PC_connector.cognitiveLoad = (((-1f * 32f/900f) * PC_connector.driverSkill + 122f/90f)
-//                                        * (float)random.nextInt(130));
-//                                PC_connector.cognitiveLoad = Math.round(PC_connector.cognitiveLoad * 1000) / 1000.0;
+//                                PC_connector.adjustedCognitiveLoad = (((-1f * 32f/900f) * PC_connector.driverSkill + 122f/90f)
+//                                        * (float)PC_connector.cognitiveLoad);
+//                                PC_connector.adjustedCognitiveLoad = Math.round(PC_connector.adjustedCognitiveLoad * 1000) / 1000.0;
                                 /*
                                      TEST CODE ENDS
                                  */
-                                cognitiveLoadTextView.setText(PC_connector.cognitiveLoad + "");
+                                cognitiveLoadTextView.setText(PC_connector.adjustedCognitiveLoad + "");
                             }
                         });
                     } catch (InterruptedException e) {
@@ -409,6 +407,7 @@ public class LearningActivity extends AppCompatActivity {
         if (learnedCount < MAX_LEARNING_COUNT) {
             learnedCount++;
             handler.postDelayed(() -> {
+                double currentAdjustedCogLoad = PC_connector.adjustedCognitiveLoad;
                 double currentCogLoad = PC_connector.cognitiveLoad;
                 targetSentence[0] = learningContent.get(learningContentIdx);
                 learningContentIdx++;
@@ -417,41 +416,43 @@ public class LearningActivity extends AppCompatActivity {
                  */
                 addData(
                         System.currentTimeMillis() + "",
+                        name,
                         sharedPreferences.getString("driving_exp", "-1"),
                         sharedPreferences.getString("english_skill", "-1"),
                         userEnglishSkill + "",
                         targetSentence[0].getSentence(),
                         targetSentence[0].getLearningLevel() + "",
                         sharedPreferences.getString("topic", "unknown"),
-                        currentCogLoad + ""
+                        currentCogLoad + "",
+                        currentAdjustedCogLoad + ""
                         );
-                if (currentCogLoad > COG_RISK_THRESHOLD) {
+                if (currentAdjustedCogLoad > COG_RISK_THRESHOLD) {
                     // 인지 부하가 '매우 높음' 상태 => 학습 보류
                     Log.d("LearningActivity", "Driver status: Risky condition");
                     userCognitiveStatus = STATUS_RISK;
                     addData("RISK");
                     runOnUiThread(() -> {
                         ttsSentenceTextView.setText( sentenceToSpeech(targetSentence[0])
-                                + "\n (인지 부하 매우 높음 상태: " + currentCogLoad + ")");
+                                + "\n (인지 부하 매우 높음 상태: " + currentAdjustedCogLoad + ")");
                     });
-                } else if (currentCogLoad > COG_HIGH_THRESHOLD) {
+                } else if (currentAdjustedCogLoad > COG_HIGH_THRESHOLD) {
                     // 인지 부하가 '높음' 상태 => 낮은 레벨 문장 학습
                     Log.d("LearningActivity", "Driver status: High condition");
                     userCognitiveStatus = STATUS_HIGH;
                     addData("HIGH");
                     runOnUiThread(() -> {
                         ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0])
-                                + "\n (인지 부하 높음 상태: " + currentCogLoad + ")"
+                                + "\n (인지 부하 높음 상태: " + currentAdjustedCogLoad + ")"
                         );
                     });
-                } else if (currentCogLoad > COG_MID_THRESHOLD) {
+                } else if (currentAdjustedCogLoad > COG_MID_THRESHOLD) {
                     // 인지 부하가 '중간' 상태 => 중간 레벨 문장 학습
                     Log.d("LearningActivity", "Driver status: Mid condition");
                     userCognitiveStatus = STATUS_MID;
                     addData("MID");
                     runOnUiThread(() -> {
                         ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0])
-                                + "\n (인지 부하 중간 상태: " + currentCogLoad + ")"
+                                + "\n (인지 부하 중간 상태: " + currentAdjustedCogLoad + ")"
                         );
                     });
                 } else {
@@ -461,7 +462,7 @@ public class LearningActivity extends AppCompatActivity {
                     addData("LOW");
                     runOnUiThread(() -> {
                         ttsSentenceTextView.setText(sentenceToSpeech(targetSentence[0])
-                                + "\n (인지 부하 낮음 상태: " + currentCogLoad + ")"
+                                + "\n (인지 부하 낮음 상태: " + currentAdjustedCogLoad + ")"
                         );
                     });
                 }

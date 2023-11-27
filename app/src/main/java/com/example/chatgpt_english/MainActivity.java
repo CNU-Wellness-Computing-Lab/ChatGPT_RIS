@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.example.chatgpt_english.connect_PC.PC_connector;
+
 
 /**
  * Start of the Page
@@ -15,6 +17,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        /**
+         * PC 통신을 위한 코드
+         */
+        PC_connector.connect();
         goToProfileSetting();
     }
 
