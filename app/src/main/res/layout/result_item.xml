@@ -1,45 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="60dp"
+    android:layout_margin="10dp"
+    android:orientation="horizontal">
 
+    <!--  리스트뷰 순서 표시할 TextView  -->
+    <TextView
+        android:id="@+id/listitem_number"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="번호" />
+
+    <!--  리스트뷰 아이템 내용 'Title'  -->
+    <TextView
+        android:id="@+id/listitem_title"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:gravity="center_vertical"
+        android:text="title"
+        android:textSize="20sp" />
+
+    <!--  리스트뷰 아이템 이미지 'image'  -->
     <ImageView
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:src="@drawable/ic_launcher_background"
-        android:id="@+id/image"
-        />
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="사과"
-            android:textColor="#000"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:layout_margin="5dp"
-            android:id="@+id/textView1"
-            />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="사과는 빨간색"
-            android:textColor="#000"
-            android:textSize="15dp"
-            android:textStyle="bold"
-            android:layout_margin="5dp"
-            android:id="@+id/textView2"
-            />
-
-
-
-
-    </LinearLayout>
-
+        android:id="@+id/listitem_image"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:src="@drawable/ic_launcher_background" />
 
 </LinearLayout>
