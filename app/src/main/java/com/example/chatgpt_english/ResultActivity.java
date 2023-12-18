@@ -1,6 +1,7 @@
 package com.example.chatgpt_english;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -18,6 +19,7 @@ public class ResultActivity extends AppCompatActivity {
     private TTSModule ttsModule;
     private TextView testTextView;
     private Handler handler;
+    private ViewPager viewPager;
 
 
     @Override
@@ -33,7 +35,10 @@ public class ResultActivity extends AppCompatActivity {
                 testTextView.setText(sentenceToSpeech("영어 학습이 모두 종료 되었습니다. 학습 결과를 운전이 완료된 후에 확인 해 주세요."));
                     });
                 },1000);
+
+
     }
+
 
     private String sentenceToSpeech(String _sentence) {
         assert ttsModule != null;
@@ -46,6 +51,7 @@ public class ResultActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 //        super.onBackPressed();
+        super.onBackPressed();
         new AlertDialog.Builder(this)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setTitle("앱 종료")
