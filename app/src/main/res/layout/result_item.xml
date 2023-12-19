@@ -1,35 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/result_layout"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
+    android:layout_height="130dp"
     android:layout_margin="10dp"
-    android:orientation="horizontal">
+    android:layout_gravity="center"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
 
     <!--  리스트뷰 순서 표시할 TextView  -->
-    <TextView
-        android:id="@+id/listitem_number"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="번호" />
 
     <!--  리스트뷰 아이템 내용 'Title'  -->
+    <LinearLayout
+        android:layout_width="390dp"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:layout_marginBottom="6dp"
+        >
+        <TextView
+            android:id="@+id/result_time"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="title"
+            android:textSize="20sp" />
+
+        <!--  리스트뷰 아이템 이미지 'image'  -->
+        <ImageView
+            android:id="@+id/answer_img"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:src="@drawable/ic_launcher_background" />
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="title"
+            android:textSize="20sp" />
+    </LinearLayout>
+
     <TextView
-        android:id="@+id/listitem_title"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="3"
-        android:gravity="center_vertical"
-        android:text="title"
+        android:id="@+id/question"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:layout_marginBottom="6dp"
+        android:text="학습문장\nhi, my name is lee "
         android:textSize="20sp" />
 
-    <!--  리스트뷰 아이템 이미지 'image'  -->
-    <ImageView
-        android:id="@+id/listitem_image"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:src="@drawable/ic_launcher_background" />
-
+    <LinearLayout
+        android:id="@+id/result_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:layout_gravity="center">
+    <TextView
+        android:id="@+id/answer"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:layout_marginBottom="6dp"
+        android:text="사용자 응답\nhi, my name is lee "
+        android:textSize="20sp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/reason_line_one"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="학습 문장과 사용자 응답 문장 사이"
+            android:visibility="visible"
+            android:textSize="20sp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="6dp"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/reason_line_num"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:gravity="center"
+                android:text="18"
+                android:visibility="visible"
+                android:textSize="20sp" />
+            <TextView
+                android:id="@+id/reason_line_two"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:gravity="center"
+                android:text="만큼의 불일치가 있습니다."
+                android:visibility="visible"
+                android:textSize="20sp" />
+        </LinearLayout>
+    </LinearLayout>
+    <TextView
+        android:id="@+id/recommendation_title"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:text="재학습 권장"
+        android:textSize="20sp" />
+    <TextView
+        android:id="@+id/recommendation_content"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:gravity="center"
+        android:text="학습 당시 인지부하가 높았습니다. "
+        android:textSize="20sp" />
+    </LinearLayout>
 </LinearLayout>
