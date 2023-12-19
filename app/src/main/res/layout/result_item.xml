@@ -56,8 +56,6 @@
     <Space
         android:layout_width="wrap_content"
         android:layout_height="10dp" />
-
-
     <LinearLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
@@ -100,17 +98,16 @@
             android:textStyle="bold"
             android:textSize="16sp" />
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/result_content"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone"
         android:layout_marginTop="12dp"
         android:layout_gravity="center">
         <TextView
-            android:id="@+id/answer"
+            android:id="@+id/answer_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
