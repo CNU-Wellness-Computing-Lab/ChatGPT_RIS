@@ -6,7 +6,7 @@
     android:layout_margin="10dp"
     android:layout_gravity="center"
     android:gravity="center_horizontal"
-    android:paddingHorizontal="15dp"
+    android:paddingHorizontal="5dp"
     android:background="@drawable/resultbox"
     android:orientation="vertical">
 
@@ -34,9 +34,8 @@
         <!--  리스트뷰 아이템 이미지 'image'  -->
         <ImageView
             android:id="@+id/answer_img"
-            android:layout_width="0dp"
+            android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_weight="1"
             android:gravity="center"
             android:src="@drawable/wrongsign"
             />
