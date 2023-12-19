@@ -9,17 +9,99 @@
     android:layout_gravity="center_horizontal"
     >
 
-    <TextView
-        android:id="@+id/testTextView"
-        android:text="영어 학습 종료 페이지"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:gravity="center"
-        />
+        android:layout_height="190dp"
+        android:orientation="vertical"
+        android:background="@drawable/headerbackground"
+
+    >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center"
+            android:text="학습 결과"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            />
+        
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="0.8" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="학습일자"
+                android:textSize="17sp"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:paddingRight="15dp"
+                android:layout_marginRight="10dp"
+                android:textStyle="bold"
+                android:textColor="@color/white"/>
+            <LinearLayout
+                android:layout_width="35dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:layout_marginLeft="-10dp"
+                android:background="@drawable/calendar"
+                >
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.5" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2023-12-27"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    android:layout_weight="3"
+                    android:layout_marginLeft="5dp"
+                    />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/calandercheck"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"/>
+            </LinearLayout>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+    </LinearLayout>
+<!--    <TextView-->
+<!--        android:id="@+id/testTextView"-->
+<!--        android:text="영어 학습 종료 페이지"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="100dp"-->
+<!--        android:gravity="center"-->
+<!--        />-->
 
     <ListView
         android:id="@+id/listview_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-25dp"
+        />
 
 </LinearLayout>

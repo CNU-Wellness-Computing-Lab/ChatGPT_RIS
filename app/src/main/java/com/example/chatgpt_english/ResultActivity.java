@@ -46,13 +46,13 @@ public class ResultActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
-        testTextView = findViewById(R.id.testTextView);
+//        testTextView = findViewById(R.id.testTextView);
         ttsModule = new TTSModule(this);
         handler = new Handler();
 
         handler.postDelayed(()->{
             runOnUiThread(() -> {
-                testTextView.setText(sentenceToSpeech("영어 학습이 모두 종료 되었습니다. 학습 결과를 운전이 완료된 후에 확인 해 주세요."));
+//                testTextView.setText(sentenceToSpeech("영어 학습이 모두 종료 되었습니다. 학습 결과를 운전이 완료된 후에 확인 해 주세요."));
                     });
                 },1000);
         ListView listView = findViewById(R.id.listview_list);
@@ -236,6 +236,9 @@ public class ResultActivity extends AppCompatActivity {
         LinearLayout layout = view.findViewById(R.id.result_content);
         layout.setVisibility(View.VISIBLE);
         ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        // check image toggle
+        ImageView imageView = (ImageView) view.findViewById(R.id.checkDetail);
+        imageView.setImageResource(R.drawable.checkreverse);
         // 레이아웃 높이를 변경합니다. 현재 높이의 2배로 설정합니다.
         layoutParams.height = (int) (layoutParams.height * 2.8);
         // 변경된 레이아웃 파라미터를 뷰에 적용합니다.
@@ -250,6 +253,9 @@ public class ResultActivity extends AppCompatActivity {
         LinearLayout layout = view.findViewById(R.id.result_content);
         layout.setVisibility(View.GONE);
         ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        // check image toggle
+        ImageView imageView = (ImageView) view.findViewById(R.id.checkDetail);
+        imageView.setImageResource(R.drawable.check);
         // 레이아웃 높이를 변경합니다. 현재 높이의 1/2배로 설정합니다.
         layoutParams.height = (int) (layoutParams.height / 2.8);
         // 변경된 레이아웃 파라미터를 뷰에 적용합니다.

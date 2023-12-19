@@ -2,10 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/result_layout"
     android:layout_width="match_parent"
-    android:layout_height="130dp"
+    android:layout_height="wrap_content"
     android:layout_margin="10dp"
     android:layout_gravity="center"
     android:gravity="center_horizontal"
+    android:background="@drawable/resultbox"
     android:orientation="vertical">
 
     <!--  리스트뷰 순서 표시할 TextView  -->
@@ -23,7 +24,10 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="title"
+            android:text="오전 10:31"
+            android:textColor="#B3838383"
+            android:paddingRight="15sp"
+            android:paddingBottom="12sp"
             android:textSize="20sp" />
 
         <!--  리스트뷰 아이템 이미지 'image'  -->
@@ -33,104 +37,149 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:gravity="center"
-            android:src="@drawable/ic_launcher_background" />
+            android:src="@drawable/wrongsign"
+            />
         <TextView
             android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="title"
-            android:textSize="20sp" />
+            android:text="학습주제: 일상"
+            android:textColor="#635B5B"
+            android:textStyle="bold"
+            android:paddingLeft="27sp"
+            android:paddingBottom="10sp"
+            android:textSize="13sp" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/question_title"
+    
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="10dp" />
+    <LinearLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:gravity="center"
-        android:text="학습문장\n"
-        android:textSize="20sp" />
-    <TextView
-        android:id="@+id/question"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:gravity="center"
-        android:layout_marginBottom="6dp"
-        android:text="hi, my name is lee "
-        android:textSize="20sp" />
-
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            >
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1.5" />
+            <TextView
+                android:id="@+id/question"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="6dp"
+                android:text="학습 문장"
+                android:gravity="center"
+                android:layout_weight="2"
+                android:textSize="18sp" />
+            <ImageView
+                android:id="@+id/checkDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/check"/>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/learningContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="hi, Lee. I'm 신뢰에요."
+            android:textStyle="bold"
+            android:textSize="16sp" />
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/result_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone"
+        android:layout_marginTop="12dp"
         android:layout_gravity="center">
         <TextView
             android:id="@+id/answer_title"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:text="사용자 응답"
-            android:textSize="20sp" />
+            android:textColor="#198617"
+            android:textSize="18sp" />
         <TextView
-            android:id="@+id/answer"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:gravity="center"
-            android:layout_marginBottom="6dp"
-            android:text="hi, my name is lee "
-            android:textSize="20sp" />
-        <LinearLayout
+            android:id="@+id/answerSentence"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginBottom="15dp"
+            android:text="hi, my name is lee."
+            android:textColor="#198617"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
             android:layout_marginBottom="6dp"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/reason_line_one"
-                android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:gravity="center"
-                    android:text="학습 문장과 사용자 응답 문장 사이"
-                    android:textSize="20sp" />
-                <LinearLayout
-                    android:layout_width="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="학습 문장과 사용자 응답 문장 사이"
+                android:textSize="15sp"
+                android:visibility="visible" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="6dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/reason_line_num"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="6dp"
-                    android:orientation="horizontal">
-                    <TextView
-                        android:id="@+id/reason_line_num"
-                        android:layout_width="match_parent"
-                        android:layout_height="30dp"
-                        android:gravity="center"
-                        android:text="18"
-                        android:visibility="visible"
-                        android:textSize="20sp" />
-                    <TextView
-                        android:id="@+id/reason_line_two"
-                        android:layout_width="match_parent"
-                        android:layout_height="30dp"
-                        android:gravity="center"
-                        android:text="만큼의 불일치가 있습니다."
-                        android:visibility="visible"
-                        android:textSize="20sp" />
-                </LinearLayout>
+                    android:gravity="center"
+                    android:text="18 "
+                    android:textColor="#FF0C0C"
+                    android:visibility="visible"
+                    android:textSize="16sp" />
+                <TextView
+                    android:id="@+id/reason_line_two"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="만큼의 불일치가 있습니다."
+                    android:visibility="visible"
+                    android:textSize="15sp" />
+            </LinearLayout>
         </LinearLayout>
         <TextView
             android:id="@+id/recommendation_title"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:text="재학습 권장"
-            android:textSize="20sp" />
+            android:textStyle="bold"
+            android:textColor="#CCB49C5C"
+            android:textSize="17sp" />
         <TextView
             android:id="@+id/recommendation_content"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:text="학습 당시 인지부하가 높았습니다. "
-            android:textSize="20sp" />
-    </LinearLayout>
+            android:textColor="#E6B49C5C"
+            android:textSize="14sp" />
+        </LinearLayout>
 </LinearLayout>
