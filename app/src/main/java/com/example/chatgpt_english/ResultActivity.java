@@ -52,7 +52,7 @@ public class ResultActivity extends AppCompatActivity {
 
         handler.postDelayed(()->{
             runOnUiThread(() -> {
-                testTextView.setText(sentenceToSpeech("영어 학습이 모두 종료 되었습니다. 학습 결과를 운전이 완료된 후에 확인 해 주세요."));
+//                testTextView.setText(sentenceToSpeech("영어 학습이 모두 종료 되었습니다. 학습 결과를 운전이 완료된 후에 확인 해 주세요."));
                     });
                 },1000);
         ListView listView = findViewById(R.id.listview_list);
