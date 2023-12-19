@@ -240,7 +240,7 @@ public class ResultActivity extends AppCompatActivity {
         ImageView imageView = (ImageView) view.findViewById(R.id.checkDetail);
         imageView.setImageResource(R.drawable.checkreverse);
         // 레이아웃 높이를 변경합니다. 현재 높이의 2배로 설정합니다.
-        layoutParams.height = (int) (layoutParams.height * 2.8);
+        layoutParams.height = (int) (layoutParams.height * 2.1);
         // 변경된 레이아웃 파라미터를 뷰에 적용합니다.
         view.setLayoutParams(layoutParams);
     }
@@ -257,7 +257,7 @@ public class ResultActivity extends AppCompatActivity {
         ImageView imageView = (ImageView) view.findViewById(R.id.checkDetail);
         imageView.setImageResource(R.drawable.check);
         // 레이아웃 높이를 변경합니다. 현재 높이의 1/2배로 설정합니다.
-        layoutParams.height = (int) (layoutParams.height / 2.8);
+        layoutParams.height = (int) (layoutParams.height / 2.1);
         // 변경된 레이아웃 파라미터를 뷰에 적용합니다.
         view.setLayoutParams(layoutParams);
     }
