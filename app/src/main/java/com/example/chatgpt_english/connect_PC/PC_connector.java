@@ -14,7 +14,7 @@ public class PC_connector {
     private static DataInputStream dis;
     private static Handler mHandler;
     private static Socket socket;
-    private static String newip = "192.168.0.44";
+    private static String newip = "192.168.0.85";
     private static int port = 12345;
     public static double cognitiveLoad =0;
     public static double adjustedCognitiveLoad = 0;

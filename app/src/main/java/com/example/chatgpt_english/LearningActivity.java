@@ -18,6 +18,7 @@ import com.example.chatgpt_english.connect_PC.PC_connector;
 import com.example.chatgpt_english.module.CSVModule;
 import com.example.chatgpt_english.module.STTModule;
 import com.example.chatgpt_english.module.TTSModule;
+import com.example.chatgpt_english.result.ResultData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -249,6 +250,8 @@ public class LearningActivity extends AppCompatActivity {
 
                     if(dataSB.toString().split(",").length > 8){
                         flushData();
+                        Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
+                                + "deleting current data...");
                     }else {
                         Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
                                 + "deleting current data...");
@@ -342,12 +345,42 @@ public class LearningActivity extends AppCompatActivity {
                     + dataSB.toString());
         }
     };
-
+    /**
+     * 0 : date
+     * 1 : 운전실력
+     * 2 : 영어실력
+     * 3 : 최종영어실력
+     * 4 : 문제
+     * 5 : ?
+     * 6 : 주제
+     * 7 : 인지부하
+     * 8 : 인지부하 최종( double)
+     * 9 : 인지부하 분류
+     * 10 : 대답
+     * 11 : 정답유무
+     * 12 : distance
+     */
+    /**
+     * 0 : date
+     * 1 : question
+     * 2 : answer
+     * 3 : congitive_load
+     * 4 : cognitive_load_category
+     * 5 : topic
+     *
+     */
     private void flushData(){
         if(dataSB != null) {
             if(dataSB.toString().split(",  ").length > 8){
                 CSVModule.writeCsvFile(getApplicationContext(), "English_Learning_withCogWithSpeed.csv", dataSB.toString());
-            }else {
+
+                String[] data = dataSB.toString().split(", ");
+//                ResultData result = new ResultData(getApplicationContext());
+//                result.initData();
+//                result.saveData(new String[]{data[0], data[4], data[10], data[8], data[9], data[6]});
+                Log.d("LearningActivity", "write csv" + dataSB.toString()
+                        + "deleting current data...");
+            } else {
                 Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
                         + "deleting current data...");
             }

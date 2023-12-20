@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         /**
          * PC 통신을 위한 코드
          */
-        PC_connector.connect();
+//        PC_connector.connect();
         goToProfileSetting();
     }
 
