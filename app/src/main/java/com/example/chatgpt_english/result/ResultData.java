@@ -37,18 +37,23 @@ public class ResultData {
      * 5 : topic
      *
      */
+    //data[0], data[4], data[10], data[8], data[9], data[6]
     public void saveData(String[] value) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("date"+size, value[0]);
-        editor.putString("question"+size, value[1]);
-        editor.putString("answer"+size, value[2]);
-        editor.putString("cognitive_load"+size, value[3]);
-        editor.putString("cognitive_load_category"+size, value[4]);
-        editor.putString("topic"+size, value[5]);
-        size++;
-        Log.d("initData"," : "+getData("answer"));
-
+        if(value!=null) {
+            editor.putString("date" + size, value[0]);
+            editor.putString("question" + size, value[4]);
+            editor.putString("answer" + size, value[10]);
+            editor.putString("cognitive_load" + size, value[8]);
+            editor.putString("cognitive_load_category" + size, value[9]);
+            editor.putString("topic" + size, value[6]);
+            size++;
+        }
         editor.apply();
+
+        Log.d("initData", "save : "+getData("date0" )+" "+getData("question0" )+" "+getData("answer0" )+" "+getData("cognitive_load0" )+" "+getData("cognitive_load_category0" )+" "+getData("topic0" ));
+
+
     }
 
     // 데이터 불러오기 메서드
@@ -57,8 +62,10 @@ public class ResultData {
     }
 
     // 저장된 데이터의 개수 확인 메서드
+
     public void initData() {
-        size = sharedPreferences.getAll().size();
+        size = sharedPreferences.getAll().size()/6;
+
         if(size>0) {
             for (int i = 0; i < size; i++) {
                 date.add(getData("date" + i));
@@ -67,9 +74,14 @@ public class ResultData {
                 cognitive_load.add(getData("cognitive_load" + i));
                 cognitive_load_category.add(getData("cognitive_load_category" + i));
                 topic.add(getData("topic" + i));
-                Log.d("initData",i+" : "+getData("answer" + i));
+                Log.d("initData",i+". init : "+getData("date" + i)+getData("question" + i)+getData("answer" + i)+getData("cognitive_load" + i)+getData("cognitive_load_category" + i)+getData("topic" + i));
             }
         }
+    }
+    public void removeAll() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
     }
 
     String getDate(int position){

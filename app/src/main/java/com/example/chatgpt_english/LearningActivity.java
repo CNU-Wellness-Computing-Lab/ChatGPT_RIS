@@ -76,7 +76,7 @@ public class LearningActivity extends AppCompatActivity {
     float userEnglishSkill = -1;
     String name = "";
     StringBuilder dataSB;
-
+    ResultData resultDB =null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,7 +95,9 @@ public class LearningActivity extends AppCompatActivity {
         if((userEnglishSkill = Float.parseFloat(sharedPreferences.getString("current_english_skill", "-1"))) < 0f){
             userEnglishSkill = Float.parseFloat(sharedPreferences.getString("english_skill", "1"));
         }
-
+        resultDB = new ResultData(getApplicationContext());
+//        resultDB.removeAll();
+        resultDB.initData();
 
         // UI element
         ttsSentenceTextView = findViewById(R.id.testView);
@@ -375,10 +377,8 @@ public class LearningActivity extends AppCompatActivity {
                 CSVModule.writeCsvFile(getApplicationContext(), "English_Learning_withCogWithSpeed.csv", dataSB.toString());
 
                 String[] data = dataSB.toString().split(", ");
-//                ResultData result = new ResultData(getApplicationContext());
-//                result.initData();
-//                result.saveData(new String[]{data[0], data[4], data[10], data[8], data[9], data[6]});
-                Log.d("LearningActivity", "write csv" + dataSB.toString()
+                resultDB.saveData(data);
+                Log.d("LearningActivity",  dataSB.toString().length()
                         + "deleting current data...");
             } else {
                 Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
