@@ -36,6 +36,7 @@ public class LearningActivity extends AppCompatActivity {
     private final int STATUS_MID = 1;
     private final int STATUS_LOW = 0;
 
+    boolean isdone = false;
     // 인지 부하가 50보다 낮은 경우 '낮음'
     //test view
     TextView cognitiveLoadTextView;
@@ -249,7 +250,7 @@ public class LearningActivity extends AppCompatActivity {
 
                     addData(lDist + "", currentCycle + "");
                     flushData();
-
+                    isdone = true;
                     if(dataSB.toString().split(",").length > 8){
                         flushData();
                         Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
@@ -376,8 +377,11 @@ public class LearningActivity extends AppCompatActivity {
             if(dataSB.toString().split(",  ").length > 8){
                 CSVModule.writeCsvFile(getApplicationContext(), "English_Learning_withCogWithSpeed.csv", dataSB.toString());
 
-                String[] data = dataSB.toString().split(", ");
-                resultDB.saveData(data);
+                if(isdone) {
+                    String[] data = dataSB.toString().split(", ");
+                    resultDB.saveData(data);
+                    isdone = false;
+                }
                 Log.d("initData",  dataSB.toString()
                         + "deleting current data...");
             } else {

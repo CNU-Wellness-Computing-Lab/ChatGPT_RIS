@@ -28,9 +28,12 @@ import android.widget.Toast;
 import com.example.chatgpt_english.module.TTSModule;
 import com.example.chatgpt_english.result.ResultData;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class ResultActivity extends AppCompatActivity {
 
@@ -42,7 +45,7 @@ public class ResultActivity extends AppCompatActivity {
     private ListView list;
     List<ListView_Item> items = null;
     private LinearLayout resultLayout=null;
-
+    ResultData resultData;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,9 +60,10 @@ public class ResultActivity extends AppCompatActivity {
                     });
                 },1000);
         ListView listView = findViewById(R.id.listview_list);
-
+        resultData = new ResultData(getApplicationContext());
+        resultData.initData();
         // Item 리스트 선언 함수 init_ArrayList(20), 20은 추가할 아이템 개수
-        init_ArrayList(20);
+        init_ArrayList(resultData.size);
 
         // 만들어진 item 리스트로 Aapter 생성
         ListView_Adapter mAdapter = new ListView_Adapter(this, items);
@@ -77,9 +81,10 @@ public class ResultActivity extends AppCompatActivity {
                 // 클릭한 위치의 Item의 title 문자열 반환
                 String title = item.getTitle();
                 if(item.getClick()) {
-                    expandLayer(view, position);
+                    expandLayer(view, position,resultData);
+
                 } else {
-                    reduceLayer(view, position);
+                    reduceLayer(view, position,resultData);
                 }
                 // 클릭한 위치의 Item Title 문자열 토스트로 보여주기
                 Toast.makeText(getApplicationContext(), title, Toast.LENGTH_SHORT).show();
@@ -199,45 +204,53 @@ public class ResultActivity extends AppCompatActivity {
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view = layoutInflater.inflate(R.layout.result_item, parent, false);
 
+
             TextView result_time = view.findViewById(R.id.result_time);
-//            TextView answer_img = view.findViewById(R.id.answer_img);
+            ImageView answer_img = view.findViewById(R.id.answer_img);
             TextView result_title = view.findViewById(R.id.title);
             TextView learningContent = view.findViewById(R.id.learningContent);
             TextView answerSentence = view.findViewById(R.id.answerSentence);
-//            TextView reason_line_num = view.findViewById(R.id.reason_line_num);
-//            TextView recommendation_title = view.findViewById(R.id.recommendation_title);
-//            TextView recommendation_content = view.findViewById(R.id.recommendation_content);
+            TextView reason_line_num = view.findViewById(R.id.reason_line_num);
+            TextView recommendation_title = view.findViewById(R.id.recommendation_title);
+            TextView recommendation_content = view.findViewById(R.id.recommendation_content);
 
-            result_time.setText(resultData.getDate(position));
+
+
+            /**
+             * 시간 설정
+             */
+            Date date = new Date(Long.parseLong(resultData.getDate(position)));
+            // SimpleDateFormat을 사용하여 원하는 형식으로 날짜 포맷 설정
+            // "a"는 오전/오후, "hh"는 시간(12시간제), "mm"은 분
+            SimpleDateFormat sdf = new SimpleDateFormat("a hh:mm");
+            // 사용자의 현지 시간대 설정
+            sdf.setTimeZone(TimeZone.getDefault());
+            result_time.setText(sdf.format(date).toString());
 //            answer_img.setText(resultData.getDate(position));
             result_title.setText("학습 주제 : "+resultData.getTopic(position));
             learningContent.setText(resultData.getQuestion(position));
             answerSentence.setText(resultData.getAnswer(position));
-//            reason_line_num.setText(resultData.(position));
+            reason_line_num.setText(resultData.getDistance(position));
 
-//            if("HIGH".equals(resultData.getCognitiveLoadCategory(position))){
-//                recommendation_content.setText("학습 당시 인지부하가 높았습니다.");
-//                if("CORRECT".equals(resultData.getAnswer(position))) {
-////                    result_title.setText(resultData.getDate(position));
-//                }else if("WRONG".equals(resultData.getAnswer(position))){
-////                    result_title.setText(resultData.getDate(position));
-//                }
-//            }else if("MEDIUM".equals(resultData.getCognitiveLoadCategory(position))){
-//                recommendation_content.setText("학습 당시 인지부하가 보통이었습니다.");
-//                if("CORRECT".equals(resultData.getAnswer(position))) {
-////                    result_title.setText(resultData.getDate(position));
-//                }else if("CORRECT".equals(resultData.getAnswer(position))) {
-////                    result_title.setText(resultData.getDate(position));
-//                }
-//            }else if("LOW".equals(resultData.getCognitiveLoadCategory(position))){
-//                recommendation_content.setText("학습 당시 인지부하가 낮았습니다.");
-//
-//                if("CORRECT".equals(resultData.getAnswer(position))) {
-////                    result_title.setText(resultData.getDate(position));
-//                }else if("CORRECT".equals(resultData.getAnswer(position))) {
-////                    result_title.setText(resultData.getDate(position));
-//                }
-//            }
+            if(" CORRECT".equals(resultData.getIsCorrect(position))) {
+                answer_img.setImageResource(R.drawable.correctsign);
+                recommendation_title.setVisibility(View.GONE);
+                recommendation_content.setVisibility(View.GONE);
+            }else if(" WRONG".equals(resultData.getIsCorrect(position))){
+                if("HIGH".equals(resultData.getCognitiveLoadCategory(position))){
+                    answer_img.setImageResource(R.drawable.retrysign);
+                    recommendation_content.setText("학습 당시 인지부하가 높았습니다.");
+
+                }else if("MEDIUM".equals(resultData.getCognitiveLoadCategory(position))){
+                    answer_img.setImageResource(R.drawable.wrongsign);
+                    recommendation_content.setText("학습 당시 인지부하가 보통이었습니다.");
+
+                }else if("LOW".equals(resultData.getCognitiveLoadCategory(position))){
+                    answer_img.setImageResource(R.drawable.wrongsign);
+                    recommendation_content.setText("학습 당시 인지부하가 낮았습니다.");
+                }
+            }
+
             // ListView의 Item을 구성하는 뷰 연결
 //            TextView number = view.findViewById(R.id.listitem_number);
 //            TextView title = view.findViewById(R.id.listitem_title);
@@ -275,7 +288,7 @@ public class ResultActivity extends AppCompatActivity {
      * 클릭시 item 확장 함수.
      *
      * */
-    private void expandLayer(View view, int position) {
+    private void expandLayer(View view, int position, ResultData resultData) {
 
         LinearLayout layout = view.findViewById(R.id.result_content);
         layout.setVisibility(View.VISIBLE);
@@ -284,7 +297,13 @@ public class ResultActivity extends AppCompatActivity {
         ImageView imageView = (ImageView) view.findViewById(R.id.checkDetail);
         imageView.setImageResource(R.drawable.checkreverse);
         // 레이아웃 높이를 변경합니다. 현재 높이의 2배로 설정합니다.
-        layoutParams.height = (int) (layoutParams.height * 2.1);
+        Log.d("wrong",resultData.getIsCorrect(position));
+        if(" CORRECT".equals(resultData.getIsCorrect(position))) {
+            layoutParams.height = (int) (layoutParams.height * 1.7);
+
+        }else if(" WRONG".equals(resultData.getIsCorrect(position))){
+            layoutParams.height = (int) (layoutParams.height * 2.1);
+        }
         // 변경된 레이아웃 파라미터를 뷰에 적용합니다.
         view.setLayoutParams(layoutParams);
     }
@@ -293,7 +312,7 @@ public class ResultActivity extends AppCompatActivity {
      * 클릭시 item 축소 함수.
      *
      * */
-    private void reduceLayer(View view, int position) {
+    private void reduceLayer(View view, int position,  ResultData resultData) {
         LinearLayout layout = view.findViewById(R.id.result_content);
         layout.setVisibility(View.GONE);
         ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
@@ -301,7 +320,11 @@ public class ResultActivity extends AppCompatActivity {
         ImageView imageView = (ImageView) view.findViewById(R.id.checkDetail);
         imageView.setImageResource(R.drawable.check);
         // 레이아웃 높이를 변경합니다. 현재 높이의 1/2배로 설정합니다.
-        layoutParams.height = (int) (layoutParams.height / 2.1);
+        if(" CORRECT".equals(resultData.getIsCorrect(position))) {
+            layoutParams.height = (int) (layoutParams.height / 1.7);
+        }else if(" WRONG".equals(resultData.getIsCorrect(position))){
+            layoutParams.height = (int) (layoutParams.height / 2.1);
+        }
         // 변경된 레이아웃 파라미터를 뷰에 적용합니다.
         view.setLayoutParams(layoutParams);
     }

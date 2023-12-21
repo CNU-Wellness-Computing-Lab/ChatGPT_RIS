@@ -8,6 +8,7 @@
     android:gravity="center_horizontal"
     android:paddingHorizontal="5dp"
     android:background="@drawable/resultbox"
+    android:paddingTop="10dp"
     android:orientation="vertical">
 
     <!--  리스트뷰 순서 표시할 TextView  -->

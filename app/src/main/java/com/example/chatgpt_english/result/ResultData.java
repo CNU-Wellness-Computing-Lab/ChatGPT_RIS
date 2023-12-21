@@ -81,8 +81,8 @@ public class ResultData {
                 cognitive_load_category.add(getData("cognitive_load_category" + i));
                 topic.add(getData("topic" + i));
                 is_correct.add(getData("is_correct"+i));
-                is_correct.add(getData("distance"+i));
-                Log.d("initData",i+". init : "+getData("date" + i)+getData("question" + i)+getData("answer" + i)+getData("cognitive_load" + i)+getData("cognitive_load_category" + i)+getData("topic" + i)+getData("distance" + i));
+                distance.add(getData("distance"+i));
+                Log.d("initData",i+". init : "+getData("date" + i)+getData("question" + i)+getData("answer" + i)+getData("cognitive_load" + i)+getData("cognitive_load_category" + i)+getData("topic" + i)+getData("distance" + i)+getData("is_correct"+i));
             }
         }
     }
@@ -114,6 +114,6 @@ public class ResultData {
         return is_correct.get(position);
     }
     public String getDistance(int position){
-        return is_correct.get(position);
+        return distance.get(position);
     }
 }
