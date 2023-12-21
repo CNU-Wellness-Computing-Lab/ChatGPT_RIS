@@ -96,7 +96,7 @@ public class LearningActivity extends AppCompatActivity {
             userEnglishSkill = Float.parseFloat(sharedPreferences.getString("english_skill", "1"));
         }
         resultDB = new ResultData(getApplicationContext());
-//        resultDB.removeAll();
+        resultDB.removeAll();
         resultDB.initData();
 
         // UI element
@@ -378,7 +378,7 @@ public class LearningActivity extends AppCompatActivity {
 
                 String[] data = dataSB.toString().split(", ");
                 resultDB.saveData(data);
-                Log.d("LearningActivity",  dataSB.toString().length()
+                Log.d("initData",  dataSB.toString()
                         + "deleting current data...");
             } else {
                 Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"

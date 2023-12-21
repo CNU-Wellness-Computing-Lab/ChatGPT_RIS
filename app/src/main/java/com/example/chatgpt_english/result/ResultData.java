@@ -20,6 +20,7 @@ public class ResultData {
     public ArrayList<String> cognitive_load = new ArrayList<>();
     public ArrayList<String> cognitive_load_category = new ArrayList<>();
     public ArrayList<String> topic = new ArrayList<>();
+    public ArrayList<String> is_correct = new ArrayList<>();
 
     // 생성자에서 Context를 받아 SharedPreferences 초기화
     public ResultData(Context context) {
@@ -40,19 +41,29 @@ public class ResultData {
     //data[0], data[4], data[10], data[8], data[9], data[6]
     public void saveData(String[] value) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
+        Log.d("initData", "save : start save");
         if(value!=null) {
             editor.putString("date" + size, value[0]);
-            editor.putString("question" + size, value[4]);
-            editor.putString("answer" + size, value[10]);
-            editor.putString("cognitive_load" + size, value[8]);
-            editor.putString("cognitive_load_category" + size, value[9]);
-            editor.putString("topic" + size, value[6]);
+            Log.d("initData", "save : start date");
+            editor.putString("question" + size, value[5]);
+            Log.d("initData", "save : start question");
+            editor.putString("answer" + size, value[11]);
+            Log.d("initData", "save : start answer");
+            editor.putString("cognitive_load" + size, value[9]);
+            Log.d("initData", "save : start cognitive_load");
+            editor.putString("cognitive_load_category" + size, value[10]);
+            Log.d("initData", "save : start cognitive_load_category");
+            editor.putString("topic" + size, value[7]);
+            Log.d("initData", "save : start topic");
+            editor.putString("is_correct" + size, value[12]);
+            Log.d("initData", "save : start is_correct");
+            editor.apply();
+            Log.d("initData", "save : "+getData("date"+size )+" "+getData("question"+size )+" "+getData("answer"+size )+" "+getData("cognitive_load"+size )+" "+getData("cognitive_load_category"+size )+" "+getData("topic"+size )+ getData("is_correct"+size ));
+
             size++;
+        }else {
+            Log.d("initData", "save : Something wrong");
         }
-        editor.apply();
-
-        Log.d("initData", "save : "+getData("date0" )+" "+getData("question0" )+" "+getData("answer0" )+" "+getData("cognitive_load0" )+" "+getData("cognitive_load_category0" )+" "+getData("topic0" ));
-
 
     }
 
@@ -64,8 +75,8 @@ public class ResultData {
     // 저장된 데이터의 개수 확인 메서드
 
     public void initData() {
-        size = sharedPreferences.getAll().size()/6;
-
+        size = sharedPreferences.getAll().size()/7;
+        Log.d("initData", "initData");
         if(size>0) {
             for (int i = 0; i < size; i++) {
                 date.add(getData("date" + i));
@@ -74,6 +85,7 @@ public class ResultData {
                 cognitive_load.add(getData("cognitive_load" + i));
                 cognitive_load_category.add(getData("cognitive_load_category" + i));
                 topic.add(getData("topic" + i));
+                is_correct.add(getData("is_correct"+i));
                 Log.d("initData",i+". init : "+getData("date" + i)+getData("question" + i)+getData("answer" + i)+getData("cognitive_load" + i)+getData("cognitive_load_category" + i)+getData("topic" + i));
             }
         }
