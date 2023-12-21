@@ -44,19 +44,12 @@ public class ResultData {
         Log.d("initData", "save : start save");
         if(value!=null) {
             editor.putString("date" + size, value[0]);
-            Log.d("initData", "save : start date");
             editor.putString("question" + size, value[5]);
-            Log.d("initData", "save : start question");
             editor.putString("answer" + size, value[11]);
-            Log.d("initData", "save : start answer");
             editor.putString("cognitive_load" + size, value[9]);
-            Log.d("initData", "save : start cognitive_load");
             editor.putString("cognitive_load_category" + size, value[10]);
-            Log.d("initData", "save : start cognitive_load_category");
             editor.putString("topic" + size, value[7]);
-            Log.d("initData", "save : start topic");
             editor.putString("is_correct" + size, value[12]);
-            Log.d("initData", "save : start is_correct");
             editor.apply();
             Log.d("initData", "save : "+getData("date"+size )+" "+getData("question"+size )+" "+getData("answer"+size )+" "+getData("cognitive_load"+size )+" "+getData("cognitive_load_category"+size )+" "+getData("topic"+size )+ getData("is_correct"+size ));
 
