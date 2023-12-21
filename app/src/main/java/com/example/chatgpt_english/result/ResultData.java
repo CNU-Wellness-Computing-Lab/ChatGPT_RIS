@@ -21,6 +21,7 @@ public class ResultData {
     public ArrayList<String> cognitive_load_category = new ArrayList<>();
     public ArrayList<String> topic = new ArrayList<>();
     public ArrayList<String> is_correct = new ArrayList<>();
+    public ArrayList<String> distance = new ArrayList<>();
 
     // 생성자에서 Context를 받아 SharedPreferences 초기화
     public ResultData(Context context) {
@@ -50,8 +51,9 @@ public class ResultData {
             editor.putString("cognitive_load_category" + size, value[10]);
             editor.putString("topic" + size, value[7]);
             editor.putString("is_correct" + size, value[12]);
+            editor.putString("distance" + size, value[13]);
             editor.apply();
-            Log.d("initData", "save : "+getData("date"+size )+" "+getData("question"+size )+" "+getData("answer"+size )+" "+getData("cognitive_load"+size )+" "+getData("cognitive_load_category"+size )+" "+getData("topic"+size )+ getData("is_correct"+size ));
+            Log.d("initData", "save : "+getData("date"+size )+" "+getData("question"+size )+" "+getData("answer"+size )+" "+getData("cognitive_load"+size )+" "+getData("cognitive_load_category"+size )+" "+getData("topic"+size )+ getData("is_correct"+size )+ getData("distance"+size ));
 
             size++;
         }else {
@@ -79,7 +81,8 @@ public class ResultData {
                 cognitive_load_category.add(getData("cognitive_load_category" + i));
                 topic.add(getData("topic" + i));
                 is_correct.add(getData("is_correct"+i));
-                Log.d("initData",i+". init : "+getData("date" + i)+getData("question" + i)+getData("answer" + i)+getData("cognitive_load" + i)+getData("cognitive_load_category" + i)+getData("topic" + i));
+                is_correct.add(getData("distance"+i));
+                Log.d("initData",i+". init : "+getData("date" + i)+getData("question" + i)+getData("answer" + i)+getData("cognitive_load" + i)+getData("cognitive_load_category" + i)+getData("topic" + i)+getData("distance" + i));
             }
         }
     }
@@ -107,7 +110,10 @@ public class ResultData {
     public String getCognitiveLoadCategory(int position){
         return cognitive_load_category.get(position);
     }
-    public String isCorrect(int position){
+    public String getIsCorrect(int position){
+        return is_correct.get(position);
+    }
+    public String getDistance(int position){
         return is_correct.get(position);
     }
 }
