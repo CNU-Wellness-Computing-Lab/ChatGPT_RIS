@@ -89,19 +89,25 @@ public class ResultData {
         editor.apply();
     }
 
-    String getDate(int position){
+    public String getDate(int position){
         return date.get(position);
     }
-    String getQuestion(int position){
+    public String getQuestion(int position){
         return question.get(position);
     }
-    String getAnswer(int position){
+    public String getAnswer(int position){
         return answer.get(position);
     }
-    String getCognitiveLoad(int position){
+    public String getCognitiveLoad(int position){
         return cognitive_load.get(position);
     }
-    String getTopic(int position){
+    public String getTopic(int position){
         return topic.get(position);
+    }
+    public String getCognitiveLoadCategory(int position){
+        return cognitive_load_category.get(position);
+    }
+    public String isCorrect(int position){
+        return is_correct.get(position);
     }
 }

@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.chatgpt_english.module.TTSModule;
+import com.example.chatgpt_english.result.ResultData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -159,6 +160,8 @@ public class ResultActivity extends AppCompatActivity {
         Context context;
         List<ListView_Item> items = null;
 
+        ResultData resultData = new ResultData(getApplicationContext());
+
         // Adapter 생성자 함수
         public ListView_Adapter(Context context, List<ListView_Item> items) {
             this.items = items;
@@ -191,9 +194,50 @@ public class ResultActivity extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             // Infalter 구현 방법 1
+            resultData.initData();
+
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view = layoutInflater.inflate(R.layout.result_item, parent, false);
 
+            TextView result_time = view.findViewById(R.id.result_time);
+//            TextView answer_img = view.findViewById(R.id.answer_img);
+            TextView result_title = view.findViewById(R.id.title);
+            TextView learningContent = view.findViewById(R.id.learningContent);
+            TextView answerSentence = view.findViewById(R.id.answerSentence);
+//            TextView reason_line_num = view.findViewById(R.id.reason_line_num);
+//            TextView recommendation_title = view.findViewById(R.id.recommendation_title);
+//            TextView recommendation_content = view.findViewById(R.id.recommendation_content);
+
+            result_time.setText(resultData.getDate(position));
+//            answer_img.setText(resultData.getDate(position));
+            result_title.setText("학습 주제 : "+resultData.getTopic(position));
+            learningContent.setText(resultData.getQuestion(position));
+            answerSentence.setText(resultData.getAnswer(position));
+//            reason_line_num.setText(resultData.(position));
+
+//            if("HIGH".equals(resultData.getCognitiveLoadCategory(position))){
+//                recommendation_content.setText("학습 당시 인지부하가 높았습니다.");
+//                if("CORRECT".equals(resultData.getAnswer(position))) {
+////                    result_title.setText(resultData.getDate(position));
+//                }else if("WRONG".equals(resultData.getAnswer(position))){
+////                    result_title.setText(resultData.getDate(position));
+//                }
+//            }else if("MEDIUM".equals(resultData.getCognitiveLoadCategory(position))){
+//                recommendation_content.setText("학습 당시 인지부하가 보통이었습니다.");
+//                if("CORRECT".equals(resultData.getAnswer(position))) {
+////                    result_title.setText(resultData.getDate(position));
+//                }else if("CORRECT".equals(resultData.getAnswer(position))) {
+////                    result_title.setText(resultData.getDate(position));
+//                }
+//            }else if("LOW".equals(resultData.getCognitiveLoadCategory(position))){
+//                recommendation_content.setText("학습 당시 인지부하가 낮았습니다.");
+//
+//                if("CORRECT".equals(resultData.getAnswer(position))) {
+////                    result_title.setText(resultData.getDate(position));
+//                }else if("CORRECT".equals(resultData.getAnswer(position))) {
+////                    result_title.setText(resultData.getDate(position));
+//                }
+//            }
             // ListView의 Item을 구성하는 뷰 연결
 //            TextView number = view.findViewById(R.id.listitem_number);
 //            TextView title = view.findViewById(R.id.listitem_title);
