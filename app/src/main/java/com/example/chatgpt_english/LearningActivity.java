@@ -97,7 +97,7 @@ public class LearningActivity extends AppCompatActivity {
             userEnglishSkill = Float.parseFloat(sharedPreferences.getString("english_skill", "1"));
         }
         resultDB = new ResultData(getApplicationContext());
-//        resultDB.removeAll();
+        resultDB.removeAll();
         resultDB.initData();
 
         // UI element
@@ -220,6 +220,7 @@ public class LearningActivity extends AppCompatActivity {
                      */
                     // 영어 문장을 말한 것이 아니므로 정답: "ERROR", "ERROR", LDistance: "-1", "(현재 학습 Cycle)"
                     addData("ERROR","ERROR", "-1", currentCycle + "");
+                    isdone=false;
                     flushData();
 
                     runOnUiThread(() -> {
@@ -249,12 +250,12 @@ public class LearningActivity extends AppCompatActivity {
                     }
 
                     addData(lDist + "", currentCycle + "");
-                    flushData();
+//                    flushData();
                     isdone = true;
                     if(dataSB.toString().split(",").length > 8){
                         flushData();
-                        Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
-                                + "deleting current data...");
+//                        Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
+//                                + "deleting current data...");
                     }else {
                         Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"
                                 + "deleting current data...");
@@ -378,11 +379,11 @@ public class LearningActivity extends AppCompatActivity {
                 CSVModule.writeCsvFile(getApplicationContext(), "English_Learning_withCogWithSpeed.csv", dataSB.toString());
 
                 if(isdone) {
-                    String[] data = dataSB.toString().split(", ");
-                    resultDB.saveData(data);
-                    isdone = false;
+                    resultDB.saveData(dataSB.toString().split(", "));
+
                 }
-                Log.d("initData",  dataSB.toString()
+                isdone = false;
+                Log.d("initData",  "flushdata: "+dataSB.toString()
                         + "deleting current data...");
             } else {
                 Log.d("LearningActivity", "Wrong data length: " + dataSB.toString().split(", ").length + "\n"

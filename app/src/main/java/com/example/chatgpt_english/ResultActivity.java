@@ -237,15 +237,15 @@ public class ResultActivity extends AppCompatActivity {
                 recommendation_title.setVisibility(View.GONE);
                 recommendation_content.setVisibility(View.GONE);
             }else if(" WRONG".equals(resultData.getIsCorrect(position))){
-                if("HIGH".equals(resultData.getCognitiveLoadCategory(position))){
+                if(" HIGH".equals(resultData.getCognitiveLoadCategory(position))){
                     answer_img.setImageResource(R.drawable.retrysign);
                     recommendation_content.setText("학습 당시 인지부하가 높았습니다.");
 
-                }else if("MEDIUM".equals(resultData.getCognitiveLoadCategory(position))){
+                }else if(" MEDIUM".equals(resultData.getCognitiveLoadCategory(position))){
                     answer_img.setImageResource(R.drawable.wrongsign);
                     recommendation_content.setText("학습 당시 인지부하가 보통이었습니다.");
 
-                }else if("LOW".equals(resultData.getCognitiveLoadCategory(position))){
+                }else if(" LOW".equals(resultData.getCognitiveLoadCategory(position))){
                     answer_img.setImageResource(R.drawable.wrongsign);
                     recommendation_content.setText("학습 당시 인지부하가 낮았습니다.");
                 }
@@ -301,7 +301,7 @@ public class ResultActivity extends AppCompatActivity {
         if(" CORRECT".equals(resultData.getIsCorrect(position))) {
             layoutParams.height = (int) (layoutParams.height * 1.7);
 
-        }else if(" WRONG".equals(resultData.getIsCorrect(position))){
+        }else if(" WRONG".equals(resultData.getIsCorrect(position))|" ERROR".equals(resultData.getIsCorrect(position))){
             layoutParams.height = (int) (layoutParams.height * 2.1);
         }
         // 변경된 레이아웃 파라미터를 뷰에 적용합니다.
@@ -322,7 +322,7 @@ public class ResultActivity extends AppCompatActivity {
         // 레이아웃 높이를 변경합니다. 현재 높이의 1/2배로 설정합니다.
         if(" CORRECT".equals(resultData.getIsCorrect(position))) {
             layoutParams.height = (int) (layoutParams.height / 1.7);
-        }else if(" WRONG".equals(resultData.getIsCorrect(position))){
+        }else if(" WRONG".equals(resultData.getIsCorrect(position))|" ERROR".equals(resultData.getIsCorrect(position))){
             layoutParams.height = (int) (layoutParams.height / 2.1);
         }
         // 변경된 레이아웃 파라미터를 뷰에 적용합니다.
