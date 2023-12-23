@@ -1,7 +1,5 @@
 package com.example.chatgpt_english;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
@@ -17,13 +15,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.chatgpt_english.module.TTSModule;
 import com.example.chatgpt_english.result.ResultData;
@@ -53,7 +49,6 @@ public class ResultActivity extends AppCompatActivity {
 //        testTextView = findViewById(R.id.testTextView);
         ttsModule = new TTSModule(this);
         handler = new Handler();
-
         handler.postDelayed(()->{
             runOnUiThread(() -> {
 //                testTextView.setText(sentenceToSpeech("영어 학습이 모두 종료 되었습니다. 학습 결과를 운전이 완료된 후에 확인 해 주세요."));
@@ -65,29 +60,22 @@ public class ResultActivity extends AppCompatActivity {
         // Item 리스트 선언 함수 init_ArrayList(20), 20은 추가할 아이템 개수
         init_ArrayList(resultData.size);
 
-        // 만들어진 item 리스트로 Aapter 생성
         ListView_Adapter mAdapter = new ListView_Adapter(this, items);
-        // ListView에 Adapter 연결
         listView.setAdapter(mAdapter);
-
-        // ListView Item 클릭이벤트 처리
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 // AdapterView - 리스트뷰에 연결한 Adapter, getItemAtPosition(),
                 // Adapter의 메소드 getItem()과 동일한 메소드
                 ListView_Item item = (ListView_Item) adapterView.getItemAtPosition(position);
-
-                // 클릭한 위치의 Item의 title 문자열 반환
-                String title = item.getTitle();
                 if(item.getClick()) {
                     expandLayer(view, position,resultData);
-
+                    mAdapter.setClick(position,true);
                 } else {
                     reduceLayer(view, position,resultData);
+                    mAdapter.setClick(position,false);
                 }
                 // 클릭한 위치의 Item Title 문자열 토스트로 보여주기
-                Toast.makeText(getApplicationContext(), title, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -164,13 +152,14 @@ public class ResultActivity extends AppCompatActivity {
         // 보여줄 Item 목록을 저장할 List
         Context context;
         List<ListView_Item> items = null;
-
+        Boolean click[] = new Boolean[100];
         ResultData resultData = new ResultData(getApplicationContext());
 
         // Adapter 생성자 함수
         public ListView_Adapter(Context context, List<ListView_Item> items) {
             this.items = items;
             this.context = context;
+            this.click = new Boolean[items.size()];
         }
 
         // Adapter.getCount(), 아이템 개수 반환 함수
@@ -190,6 +179,13 @@ public class ResultActivity extends AppCompatActivity {
         public long getItemId(int position) {
             return position;
         }
+        public boolean getClick(int position){
+            return click[position];
+        }
+
+        public void setClick(int position, boolean click){
+            this.click[position] = click;
+        }
 
         /**
          * 각 item 내부의 정보를 관리하는 함수.
@@ -204,7 +200,6 @@ public class ResultActivity extends AppCompatActivity {
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view = layoutInflater.inflate(R.layout.result_item, parent, false);
 
-
             TextView result_time = view.findViewById(R.id.result_time);
             ImageView answer_img = view.findViewById(R.id.answer_img);
             TextView result_title = view.findViewById(R.id.title);
@@ -213,8 +208,6 @@ public class ResultActivity extends AppCompatActivity {
             TextView reason_line_num = view.findViewById(R.id.reason_line_num);
             TextView recommendation_title = view.findViewById(R.id.recommendation_title);
             TextView recommendation_content = view.findViewById(R.id.recommendation_content);
-
-
 
             /**
              * 시간 설정
@@ -250,18 +243,13 @@ public class ResultActivity extends AppCompatActivity {
                     recommendation_content.setText("학습 당시 인지부하가 낮았습니다.");
                 }
             }
+            try {
+                if (getClick(position)) {
+                    expandLayer(view, position, resultData);
+                }
+            } catch (Exception e){
 
-            // ListView의 Item을 구성하는 뷰 연결
-//            TextView number = view.findViewById(R.id.listitem_number);
-//            TextView title = view.findViewById(R.id.listitem_title);
-//            ImageView image = view.findViewById(R.id.listitem_image);
-            // ListView의 Item을 구성하는 뷰 세팅
-            ListView_Item item = items.get(position);
-//            number.setText(String.valueOf(position+1));		// 해당위치 +1 설정, 배열순으로 0부터 시작
-//            title.setText(item.getTitle());					// item 객체 내용을 가져와 세팅
-//            image.setImageResource(item.getImage());		// item 객체 내용을 가져와 세팅
-
-            // 설정한 view를 반환해줘야 함
+            }
             return view;
         }
     }
