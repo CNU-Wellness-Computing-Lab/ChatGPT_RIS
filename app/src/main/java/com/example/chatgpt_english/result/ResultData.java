@@ -70,10 +70,13 @@ public class ResultData {
     // 저장된 데이터의 개수 확인 메서드
 
     public void initData() {
-        size = sharedPreferences.getAll().size()/7;
+        size = sharedPreferences.getAll().size()/8;
         Log.d("initData", "initData");
         if(size>0) {
             for (int i = 0; i < size; i++) {
+                if("null".equals(getData("date" + i))){
+                    break;
+                }
                 date.add(getData("date" + i));
                 question.add(getData("question" + i));
                 answer.add(getData("answer" + i));

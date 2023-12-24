@@ -97,7 +97,7 @@ public class LearningActivity extends AppCompatActivity {
             userEnglishSkill = Float.parseFloat(sharedPreferences.getString("english_skill", "1"));
         }
         resultDB = new ResultData(getApplicationContext());
-        resultDB.removeAll();
+//        resultDB.removeAll();
         resultDB.initData();
 
         // UI element

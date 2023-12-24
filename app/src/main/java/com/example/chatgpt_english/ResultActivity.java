@@ -41,7 +41,7 @@ public class ResultActivity extends AppCompatActivity {
     private ListView list;
     List<ListView_Item> items = null;
     private LinearLayout resultLayout=null;
-    ResultData resultData;
+    static ResultData resultData;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,11 +49,11 @@ public class ResultActivity extends AppCompatActivity {
 //        testTextView = findViewById(R.id.testTextView);
         ttsModule = new TTSModule(this);
         handler = new Handler();
-        handler.postDelayed(()->{
-            runOnUiThread(() -> {
-//                testTextView.setText(sentenceToSpeech("영어 학습이 모두 종료 되었습니다. 학습 결과를 운전이 완료된 후에 확인 해 주세요."));
-                    });
-                },1000);
+//        handler.postDelayed(()->{
+//            runOnUiThread(() -> {
+////                testTextView.setText(sentenceToSpeech("영어 학습이 모두 종료 되었습니다. 학습 결과를 운전이 완료된 후에 확인 해 주세요."));
+//                    });
+//                },1000);
         ListView listView = findViewById(R.id.listview_list);
         resultData = new ResultData(getApplicationContext());
         resultData.initData();
@@ -153,7 +153,7 @@ public class ResultActivity extends AppCompatActivity {
         Context context;
         List<ListView_Item> items = null;
         Boolean click[] = new Boolean[100];
-        ResultData resultData = new ResultData(getApplicationContext());
+//        ResultData resultData = new ResultData(getApplicationContext());
 
         // Adapter 생성자 함수
         public ListView_Adapter(Context context, List<ListView_Item> items) {
@@ -195,7 +195,6 @@ public class ResultActivity extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             // Infalter 구현 방법 1
-            resultData.initData();
 
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view = layoutInflater.inflate(R.layout.result_item, parent, false);
@@ -224,6 +223,25 @@ public class ResultActivity extends AppCompatActivity {
             learningContent.setText(resultData.getQuestion(position));
             answerSentence.setText(resultData.getAnswer(position));
             reason_line_num.setText(resultData.getDistance(position));
+
+
+            learningContent.post(new Runnable() {
+                @Override
+                public void run() {
+
+
+                    if (learningContent.getLineCount()>1 | answerSentence.getLineCount()>1) {
+                        // 두 줄 이상일 때의 처리
+                        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+                        // 레이아웃 높이를 변경합니다. 현재 높이의 2배로 설정합니다.
+                        layoutParams.height = (int) (layoutParams.height * 1.1);
+                        Log.d("InitData","learningContent : "+learningContent.getLineCount()+"");
+                        Log.d("InitData","answerSentence : "+answerSentence.getLineCount()+"");
+                        view.setLayoutParams(layoutParams);
+
+                    }
+                }
+            });
 
             if(" CORRECT".equals(resultData.getIsCorrect(position))) {
                 answer_img.setImageResource(R.drawable.correctsign);
@@ -277,21 +295,24 @@ public class ResultActivity extends AppCompatActivity {
      *
      * */
     private void expandLayer(View view, int position, ResultData resultData) {
+        TextView learningContent = view.findViewById(R.id.learningContent);
+        TextView answerSentence = view.findViewById(R.id.answerSentence);
 
         LinearLayout layout = view.findViewById(R.id.result_content);
         layout.setVisibility(View.VISIBLE);
-        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-        // check image toggle
         ImageView imageView = (ImageView) view.findViewById(R.id.checkDetail);
         imageView.setImageResource(R.drawable.checkreverse);
+        // check image toggle
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
         // 레이아웃 높이를 변경합니다. 현재 높이의 2배로 설정합니다.
-        Log.d("wrong",resultData.getIsCorrect(position));
         if(" CORRECT".equals(resultData.getIsCorrect(position))) {
-            layoutParams.height = (int) (layoutParams.height * 1.7);
+            layoutParams.height = (int) (layoutParams.height * 1.8);
 
-        }else if(" WRONG".equals(resultData.getIsCorrect(position))|" ERROR".equals(resultData.getIsCorrect(position))){
+        }else if(answerSentence.getLineCount()>1| learningContent.getLineCount()>1 | answerSentence.getLineCount()>1|" WRONG".equals(resultData.getIsCorrect(position))|" ERROR".equals(resultData.getIsCorrect(position))){
             layoutParams.height = (int) (layoutParams.height * 2.1);
         }
+        Log.d("InitData","learningContent : "+learningContent.getLineCount()+"");
+        Log.d("InitData","answerSentence : "+answerSentence.getLineCount()+"");
         // 변경된 레이아웃 파라미터를 뷰에 적용합니다.
         view.setLayoutParams(layoutParams);
     }
@@ -301,6 +322,9 @@ public class ResultActivity extends AppCompatActivity {
      *
      * */
     private void reduceLayer(View view, int position,  ResultData resultData) {
+        TextView learningContent = view.findViewById(R.id.learningContent);
+        TextView answerSentence = view.findViewById(R.id.answerSentence);
+
         LinearLayout layout = view.findViewById(R.id.result_content);
         layout.setVisibility(View.GONE);
         ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
@@ -309,10 +333,13 @@ public class ResultActivity extends AppCompatActivity {
         imageView.setImageResource(R.drawable.check);
         // 레이아웃 높이를 변경합니다. 현재 높이의 1/2배로 설정합니다.
         if(" CORRECT".equals(resultData.getIsCorrect(position))) {
-            layoutParams.height = (int) (layoutParams.height / 1.7);
-        }else if(" WRONG".equals(resultData.getIsCorrect(position))|" ERROR".equals(resultData.getIsCorrect(position))){
+            layoutParams.height = (int) (layoutParams.height / 1.8);
+        }else if(learningContent.getLineCount()>1 |" WRONG".equals(resultData.getIsCorrect(position))|" ERROR".equals(resultData.getIsCorrect(position))){
             layoutParams.height = (int) (layoutParams.height / 2.1);
+        }else if(answerSentence.getLineCount()>1|answerSentence.getLineCount()>1){
+            layoutParams.height = (int) (layoutParams.height / 2.2);
         }
+
         // 변경된 레이아웃 파라미터를 뷰에 적용합니다.
         view.setLayoutParams(layoutParams);
     }
